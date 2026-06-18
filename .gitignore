@@ -1,0 +1,27 @@
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# env
+.env
+.env*.local
+
+# misc
+.DS_Store
+*.log
+npm-debug.log*
+
+# Graphify and Agent/Skill files
+graphify-out/
+.graphifyignore
+.agents/
+.kiro/
+
+
+LinkedIn_AutoPost_PRD_Chandan.md
