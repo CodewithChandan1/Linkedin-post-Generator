@@ -83,6 +83,9 @@ export async function POST(req) {
       content: parsed.content,
       hashtags: parsed.hashtags || [],
       imagePrompt: parsed.imagePrompt || "",
+      imageUrl: parsed.imagePrompt
+        ? `https://image.pollinations.ai/prompt/${encodeURIComponent(parsed.imagePrompt + ", professional, clean, minimal, tech aesthetic, LinkedIn post visual")}?width=1080&height=1080&nologo=true`
+        : "",
       topic,
     });
   } catch (err) {

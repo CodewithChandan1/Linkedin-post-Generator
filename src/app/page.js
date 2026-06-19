@@ -6,11 +6,14 @@ import ProfileSidebar from "@/components/ProfileSidebar";
 import StatsSidebar from "@/components/StatsSidebar";
 import PostCard from "@/components/PostCard";
 import PostSkeleton from "@/components/PostSkeleton";
-import { SparkleIcon, RefreshIcon } from "@/components/Icons";
+import { SparkleIcon } from "@/components/Icons";
 import SettingsModal from "@/components/SettingsModal";
+import LinkedInConnect from "@/components/LinkedInConnect";
+import EditPostModal from "@/components/EditPostModal";
 import { loadPosts, savePosts, todayKey } from "@/lib/storage";
 import { loadSettings, saveSettings } from "@/lib/settings";
 import { useReminderScheduler } from "@/lib/useReminderScheduler";
+import { useLinkedIn } from "@/lib/useLinkedIn";
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
@@ -20,10 +23,12 @@ export default function Home() {
   const [toast, setToast] = useState("");
   const [settings, setSettings] = useState(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [editingPost, setEditingPost] = useState(null);
 
   const today = todayKey();
-  const todaysPost = posts.find((p) => p.date === today);
-  const history = posts.filter((p) => p.date !== today);
+  const todaysPosts = posts.filter((p) => p.date === today);
+  const todaysPost = todaysPosts[0] || null; // latest one (sorted newest first)
+  const history = posts.filter((p) => p !== todaysPost);
 
   // hydrate from localStorage once
   useEffect(() => {
@@ -40,10 +45,20 @@ export default function Home() {
   // run the daily reminder scheduler while the app is open
   useReminderScheduler({ settings, todaysPost });
 
+  // LinkedIn OAuth connection
+  const linkedin = useLinkedIn();
+
   function handleSaveSettings(next) {
     setSettings(next);
     saveSettings(next);
     showToast("Settings saved");
+  }
+
+  function handleEditSave(updatedPost) {
+    setPosts((prev) =>
+      prev.map((p) => (p.id === updatedPost.id ? updatedPost : p))
+    );
+    showToast("Post updated");
   }
 
   const generate = useCallback(
@@ -65,6 +80,7 @@ export default function Home() {
           content: data.content,
           hashtags: data.hashtags,
           imagePrompt: data.imagePrompt,
+          imageUrl: data.imageUrl || "",
           topic: data.topic,
           status: "pending",
           source: "scheduled",
@@ -72,8 +88,15 @@ export default function Home() {
         };
 
         setPosts((prev) => {
-          const withoutToday = replace ? prev.filter((p) => p.date !== today) : prev;
-          return [newPost, ...withoutToday];
+          if (replace) {
+            // Only replace the current top pending post (for "Regenerate" inside card)
+            const topPending = prev.find((p) => p.date === today && p.status === "pending");
+            if (topPending) {
+              return [newPost, ...prev.filter((p) => p.id !== topPending.id)];
+            }
+          }
+          // "Generate New Post" — just add to front, keep everything
+          return [newPost, ...prev];
         });
       } catch (e) {
         setError(e.message);
@@ -97,18 +120,33 @@ export default function Home() {
     setTimeout(() => setToast(""), 3000);
   }
 
-  function handlePost(post) {
-    // Phase 1: open LinkedIn's compose window pre-filled (no API approval needed).
+  async function handlePost(post) {
     const text = `${post.content}\n\n${(post.hashtags || []).join(" ")}`;
-    const url = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(text)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
 
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === post.id ? { ...p, status: "posted", postedAt: new Date().toISOString() } : p
-      )
-    );
-    showToast("Posted to LinkedIn! 🎉 Reply to your first comment within 10 min.");
+    if (linkedin.isConnected) {
+      // Use LinkedIn API for real one-click posting with image
+      try {
+        await linkedin.post(text, post.imageUrl || "");
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.id === post.id ? { ...p, status: "posted", postedAt: new Date().toISOString() } : p
+          )
+        );
+        showToast("Posted to LinkedIn with image! 🎉 Reply to your first comment within 10 min.");
+      } catch (err) {
+        showToast(`Post failed: ${err.message}`);
+      }
+    } else {
+      // Fallback: open LinkedIn's compose window pre-filled
+      const url = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(text)}`;
+      window.open(url, "_blank", "noopener,noreferrer");
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === post.id ? { ...p, status: "posted", postedAt: new Date().toISOString() } : p
+        )
+      );
+      showToast("Opened LinkedIn — paste and post! 🎉");
+    }
   }
 
   return (
@@ -118,8 +156,9 @@ export default function Home() {
       <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left: profile */}
         <div className="lg:col-span-3 order-2 lg:order-1">
-          <div className="lg:sticky lg:top-20">
+          <div className="lg:sticky lg:top-20 space-y-4">
             <ProfileSidebar />
+            <LinkedInConnect linkedin={linkedin} />
           </div>
         </div>
 
@@ -128,12 +167,11 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-semibold text-gray-900">Today's post</h1>
             <button
-              onClick={() => generate(true)}
+              onClick={() => generate(false)}
               disabled={loading}
-              className="flex items-center gap-1.5 text-sm text-linkedin hover:bg-linkedin/10 px-3 py-1.5 rounded-full transition disabled:opacity-50"
+              className="flex items-center gap-1.5 text-sm text-white bg-linkedin hover:bg-linkedin-hover px-3 py-1.5 rounded-full transition font-medium disabled:opacity-50"
             >
-              <RefreshIcon className="w-4 h-4" />
-              Regenerate
+              + Generate New Post
             </button>
           </div>
 
@@ -152,7 +190,7 @@ export default function Home() {
 
           {loading && !todaysPost && <PostSkeleton />}
 
-          {todaysPost && <PostCard post={todaysPost} onPost={handlePost} isToday />}
+          {todaysPost && <PostCard post={todaysPost} onPost={handlePost} onRegenerate={() => generate(true)} onEdit={setEditingPost} isToday />}
 
           {!loading && !todaysPost && !error && (
             <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
@@ -172,7 +210,7 @@ export default function Home() {
               <h2 className="text-sm font-semibold text-gray-500 mb-3">Post history</h2>
               <div className="space-y-4">
                 {history.map((p) => (
-                  <PostCard key={p.id} post={p} onPost={handlePost} />
+                  <PostCard key={p.id} post={p} onPost={handlePost} onEdit={setEditingPost} />
                 ))}
               </div>
             </div>
@@ -193,6 +231,13 @@ export default function Home() {
         settings={settings || {}}
         onSave={handleSaveSettings}
         todaysPost={todaysPost}
+      />
+
+      <EditPostModal
+        open={Boolean(editingPost)}
+        post={editingPost}
+        onSave={handleEditSave}
+        onClose={() => setEditingPost(null)}
       />
 
       {toast && (
