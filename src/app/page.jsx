@@ -554,9 +554,13 @@ export default function Home() {
     );
   }
 
+  if (!user) {
+    return <AuthScreen onAuthSuccess={(u) => setUser(u)} />;
+  }
+
   return (
     <div className="relative min-h-screen">
-      <div className={!user ? "select-none pointer-events-none opacity-95" : ""}>
+      <div>
       <TopNav
         user={user}
         onLogout={handleLogout}
@@ -896,19 +900,6 @@ export default function Home() {
           showToast("Successfully upgraded to Pro Creator!");
         }}
       />
-
-      {/* Auth overlay modal */}
-      {!user && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/15 backdrop-blur-[2px] overflow-y-auto">
-          <div className="w-full max-w-md bg-white/85 backdrop-blur-xl border border-white rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden my-8">
-            {/* Decorative glows */}
-            <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-blue-500/5 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full bg-indigo-500/5 blur-3xl pointer-events-none" />
-            
-            <AuthScreen onAuthSuccess={(u) => setUser(u)} isModal />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
