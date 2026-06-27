@@ -464,7 +464,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
   );
 
   return (
-    <div className="min-h-screen bg-[#f3f2ef] flex flex-col md:flex-row relative font-sans">
+    <div className="min-h-screen md:h-screen md:overflow-hidden bg-[#f3f2ef] flex flex-col md:flex-row relative font-sans">
       {/* INJECT CUSTOM CSS ANIMATIONS */}
       <style>{`
         @keyframes float-slow {
@@ -510,7 +510,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-60 pointer-events-none" />
 
       {/* LEFT COLUMN: HERO SHOWCASE PANEL (Only visible on medium and larger screens) */}
-      <div className="hidden md:flex md:w-1/2 lg:w-3/5 relative overflow-y-auto flex-col justify-between p-10 lg:p-14 border-r border-slate-200 z-10 min-h-screen">
+      <div className="hidden md:flex md:w-1/2 lg:w-3/5 relative overflow-y-auto flex-col justify-between p-10 lg:p-14 border-r border-slate-200 z-10 h-full">
 
         {/* Brand header */}
         <div className="flex items-center gap-2 z-10 mb-4">
@@ -635,7 +635,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
       </div>
 
       {/* RIGHT COLUMN: Form — full height scroll on mobile */}
-      <div className="flex-1 flex flex-col justify-center min-h-screen md:min-h-0 overflow-y-auto py-8 px-4 sm:px-8 md:p-12 lg:p-16 z-10">
+      <div className="flex-1 flex flex-col justify-center overflow-y-auto py-8 px-4 sm:px-8 md:p-12 lg:p-16 z-10 md:h-full">
         <div className="w-full max-w-md mx-auto space-y-5">
           <div className="space-y-1.5">
             {/* Logo for mobile devices */}

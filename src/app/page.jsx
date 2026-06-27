@@ -102,17 +102,6 @@ export default function Home() {
     checkAuth();
   }, []);
 
-  // Disable body scroll when auth modal is active
-  useEffect(() => {
-    if (!authLoading && !user) {
-      document.body.classList.add("overflow-hidden");
-    } else {
-      document.body.classList.remove("overflow-hidden");
-    }
-    return () => {
-      document.body.classList.remove("overflow-hidden");
-    };
-  }, [user, authLoading]);
 
   async function handleLogout() {
     try {
