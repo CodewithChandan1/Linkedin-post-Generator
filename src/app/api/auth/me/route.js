@@ -16,6 +16,7 @@ export async function GET() {
       email: user.email,
       profile: user.profile,
       isPremium: user.isPremium || false,
+      isEmailVerified: user.isEmailVerified || false,
     },
   });
 }

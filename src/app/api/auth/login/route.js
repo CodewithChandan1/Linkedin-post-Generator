@@ -30,6 +30,8 @@ export async function POST(request) {
         id: user._id.toString(),
         email: user.email,
         profile: user.profile,
+        isPremium: user.isPremium || false,
+        isEmailVerified: user.isEmailVerified || false,
       },
     });
   } catch (error) {

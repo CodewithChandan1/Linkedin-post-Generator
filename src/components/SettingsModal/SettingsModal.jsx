@@ -10,10 +10,54 @@ import {
   notificationsSupported,
 } from "@/lib/reminders";
 
-export default function SettingsModal({ open, onClose, settings, onSave, todaysPost }) {
+export default function SettingsModal({ open, onClose, settings, onSave, todaysPost, user, onUpdateUser }) {
   const [draft, setDraft] = useState(settings || {});
   const [emailStatus, setEmailStatus] = useState("");
   const [pushStatus, setPushStatus] = useState(notificationPermission());
+
+  // Email Verification States
+  const [verifyStep, setVerifyStep] = useState("idle"); // "idle" | "need_verify" | "sent" | "verifying"
+  const [loadingCode, setLoadingCode] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [verificationError, setVerificationError] = useState("");
+
+  async function handleSendVerificationCode() {
+    setLoadingCode(true);
+    setVerificationError("");
+    try {
+      const res = await fetch("/api/auth/send-verification", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send verification code");
+      setVerifyStep("sent");
+    } catch (err) {
+      setVerificationError(err.message);
+    } finally {
+      setLoadingCode(false);
+    }
+  }
+
+  async function handleVerifyCode() {
+    setVerifyStep("verifying");
+    setVerificationError("");
+    try {
+      const res = await fetch("/api/auth/verify-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: verificationCode }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Verification failed");
+      
+      if (onUpdateUser) {
+        onUpdateUser(data.user);
+      }
+      setVerifyStep("idle");
+      update({ reminderEnabled: true });
+    } catch (err) {
+      setVerificationError(err.message);
+      setVerifyStep("sent");
+    }
+  }
 
   if (!open) return null;
 
@@ -106,8 +150,76 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
               label="Daily email reminder"
               icon={<Bell size={14} />}
               checked={draft.reminderEnabled}
-              onChange={(v) => update({ reminderEnabled: v })}
+              onChange={(v) => {
+                if (v && user && !user.isEmailVerified) {
+                  setVerifyStep("need_verify");
+                } else {
+                  update({ reminderEnabled: v });
+                }
+              }}
             />
+
+            {/* Email verification flow UI */}
+            {user && !user.isEmailVerified && verifyStep !== "idle" && (
+              <div className="bg-blue-50/70 border border-blue-100 rounded-xl p-4 mt-2 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                <p className="text-xs text-slate-600 leading-normal">
+                  To enable email reminders, we need to verify your email address. We'll send a 6-digit code to <strong>{user.email}</strong>.
+                </p>
+                {verifyStep === "need_verify" && (
+                  <button
+                    type="button"
+                    onClick={handleSendVerificationCode}
+                    disabled={loadingCode}
+                    className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg transition"
+                  >
+                    {loadingCode ? "Sending Code..." : "Send Verification Code"}
+                  </button>
+                )}
+
+                {(verifyStep === "sent" || verifyStep === "verifying") && (
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                      Enter 6-Digit Code
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        maxLength={6}
+                        value={verificationCode}
+                        onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ""))}
+                        placeholder="123456"
+                        className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm tracking-widest font-mono text-center w-28 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleVerifyCode}
+                        disabled={verificationCode.length !== 6 || verifyStep === "verifying"}
+                        className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg transition disabled:opacity-50"
+                      >
+                        {verifyStep === "verifying" ? "Verifying..." : "Verify Code"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {verificationError && (
+                  <p className="text-xs text-red-600 font-semibold">{verificationError}</p>
+                )}
+              </div>
+            )}
+
+            {user && !user.isEmailVerified && verifyStep === "idle" && draft.reminderEnabled && (
+              <div className="text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-lg p-2 flex justify-between items-center">
+                <span>⚠️ Email verification required</span>
+                <button
+                  type="button"
+                  onClick={() => setVerifyStep("need_verify")}
+                  className="font-bold underline hover:text-amber-700"
+                >
+                  Verify Now
+                </button>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BellOff size={14} className="text-gray-500" />

@@ -794,6 +794,8 @@ export default function Home() {
         settings={settings || {}}
         onSave={handleSaveSettings}
         todaysPost={todaysPost}
+        user={user}
+        onUpdateUser={setUser}
       />
 
       <EditPostModal

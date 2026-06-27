@@ -41,7 +41,7 @@ export async function POST(request) {
       userId: user._id.toString(),
       email: user.email,
       reminderTime: "08:00",
-      reminderEnabled: true,
+      reminderEnabled: false,
       pushEnabled: false,
       topics: {},
     });
@@ -54,6 +54,8 @@ export async function POST(request) {
         id: user._id.toString(),
         email: user.email,
         profile: user.profile,
+        isPremium: false,
+        isEmailVerified: false,
       },
     });
   } catch (error) {

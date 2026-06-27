@@ -63,6 +63,7 @@ export async function POST(request) {
           projects: [],
         },
         isPremium: false,
+        isEmailVerified: true,
       });
     }
 
@@ -76,6 +77,7 @@ export async function POST(request) {
         email: user.email,
         profile: user.profile,
         isPremium: user.isPremium || false,
+        isEmailVerified: user.isEmailVerified || false,
       },
     });
   } catch (error) {
