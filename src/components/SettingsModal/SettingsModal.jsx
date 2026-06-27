@@ -11,7 +11,12 @@ import {
 } from "@/lib/reminders";
 
 export default function SettingsModal({ open, onClose, settings, onSave, todaysPost, user, onUpdateUser }) {
-  const [draft, setDraft] = useState(settings || {});
+  // Pre-fill email from user profile if settings.email is empty
+  const userEmail = user?.email || user?.profile?.email || "";
+  const [draft, setDraft] = useState(() => ({
+    ...(settings || {}),
+    email: (settings?.email) || userEmail,
+  }));
   const [emailStatus, setEmailStatus] = useState("");
   const [pushStatus, setPushStatus] = useState(notificationPermission());
 

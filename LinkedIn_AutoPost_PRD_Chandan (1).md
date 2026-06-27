@@ -422,7 +422,7 @@ LinkedIn's Nexus algorithm introduced "Depth Score" as the primary ranking metri
 
 ## 10. Email Reminder Template
 
-**Subject:** 🚀 Your LinkedIn post for [Day, Date] is ready!
+**Subject:**  Your LinkedIn post for [Day, Date] is ready!
 
 > Hi Chandan,
 >
@@ -482,7 +482,7 @@ Build **Phase 1** right now as an interactive artifact — LinkedIn-like feed wi
 
 **Complete app will include 18 core features across 6 phases** — from basic post generation all the way to PDF carousel auto-generation, golden hour assistant, AI humanizer, topic DNA tracking, and evergreen recycling.
 
-Say **"Start Phase 1"** to begin building! 🚀
+Say **"Start Phase 1"** to begin building! 
 
 ### Full Feature List at a Glance
 

@@ -29,7 +29,7 @@ export async function sendReminderEmail({ email, post, bestTime }) {
   const params = {
     to_email: email,
     to_name: profile.name,
-    subject: `🚀 Your LinkedIn post for ${today} is ready!`,
+    subject: ` Your LinkedIn post for ${today} is ready!`,
     post_date: today,
     best_time: bestTime ? `${bestTime.slot} (${bestTime.note})` : "8:30 AM IST",
     post_preview: preview,

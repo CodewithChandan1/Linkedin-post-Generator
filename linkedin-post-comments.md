@@ -37,7 +37,7 @@ What's YOUR after-hours routine? I know I'm not the only one with a second shift
 
 ## First Comment (by you, within 30 sec of posting)
 
-> Will share the full demo once all 6 phases are done. Stay tuned 🚀
+> Will share the full demo once all 6 phases are done. Stay tuned 
 
 ---
 

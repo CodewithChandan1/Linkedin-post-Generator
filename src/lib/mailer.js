@@ -25,7 +25,7 @@ function buildReminderHtml({ name, previewText, bestTime, appLink, postDate }) {
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#0A66C2 0%,#0d7fe8 100%);padding:32px 40px;text-align:center;">
-              <div style="font-size:32px;margin-bottom:8px;">🚀</div>
+              <div style="font-size:32px;margin-bottom:8px;"></div>
               <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:800;letter-spacing:-0.5px;">PostedIn</h1>
               <p style="margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:14px;">Your daily LinkedIn post is ready to publish</p>
             </td>
@@ -129,7 +129,7 @@ export async function sendReminderMail({ toEmail, name, postPreview }) {
   await transporter.sendMail({
     from: `"PostedIn" <${gmailUser}>`,
     to: toEmail,
-    subject: `🚀 Your LinkedIn post for ${today} is ready!`,
+    subject: ` Your LinkedIn post for ${today} is ready!`,
     html: buildReminderHtml({ name, previewText, bestTime, appLink, postDate: today }),
   });
 

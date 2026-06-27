@@ -44,7 +44,7 @@ export default function CarouselGenerator({ post, profile, onClose }) {
           slideNumber: 0,
           headline: data.title,
           body: `${devName} · Full Stack Developer`,
-          emoji: "🚀",
+          emoji: "",
           isCover: true,
         },
         ...(data.slides || []),
@@ -107,7 +107,7 @@ export default function CarouselGenerator({ post, profile, onClose }) {
 
   async function copyCaption() {
     const full = `${linkedInCaption}\n\n${hashtags.join(" ")}`;
-    await navigator.clipboard.writeText(full).catch(() => {});
+    await navigator.clipboard.writeText(full).catch(() => { });
   }
 
   return (

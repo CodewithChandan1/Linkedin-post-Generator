@@ -38,7 +38,7 @@ export function useReminderScheduler({ settings, todaysPost }) {
 
       if (settings.pushEnabled) {
         showNotification(
-          "Time to post on LinkedIn! 🚀",
+          "Time to post on LinkedIn! ",
           `Your ${bestTime.dayName} post is ready. Best window: ${bestTime.slot}.`
         );
       }
@@ -46,7 +46,7 @@ export function useReminderScheduler({ settings, todaysPost }) {
       if (settings.email && emailConfigured()) {
         try {
           await sendReminderEmail({ email: settings.email, post: todaysPost, bestTime });
-          await fetch("/api/settings/increment-emails", { method: "POST" }).catch(() => {});
+          await fetch("/api/settings/increment-emails", { method: "POST" }).catch(() => { });
         } catch {
           // email failed silently; push already delivered if enabled
         }

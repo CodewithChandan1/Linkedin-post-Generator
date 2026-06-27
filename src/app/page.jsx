@@ -108,7 +108,7 @@ export default function Home() {
                 type: "success",
                 title: `Welcome back, ${data.user.profile?.name?.split(" ")[0] || "there"}! 👋`,
                 message: "Your daily LinkedIn post is being prepared. Check below!",
-                icon: "🚀",
+                icon: "",
               });
             }, 1000);
           }
@@ -510,9 +510,9 @@ export default function Home() {
         showToast("Posted to LinkedIn with image! Reply to your first comment within 10 min.");
         pushNotification({
           type: "success",
-          title: "Posted to LinkedIn! 🚀",
+          title: "Posted to LinkedIn! ",
           message: "Reply to the first comment within 10 minutes to boost reach.",
-          icon: "🚀",
+          icon: "",
         });
       } catch (err) {
         showToast(`Post failed: ${err.message}`);
@@ -757,8 +757,8 @@ export default function Home() {
                         onClick={() => handleHumanize(todaysPost)}
                         disabled={humanizing || todaysPost.humanized}
                         className={`flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border transition ${todaysPost.humanized
-                            ? "border-green-300 text-green-700 bg-green-50 cursor-default"
-                            : "border-purple-300 text-purple-700 bg-purple-50 hover:bg-purple-100"
+                          ? "border-green-300 text-green-700 bg-green-50 cursor-default"
+                          : "border-purple-300 text-purple-700 bg-purple-50 hover:bg-purple-100"
                           } disabled:opacity-60`}
                       >
                         {todaysPost.humanized
@@ -1056,7 +1056,7 @@ function LoadingScreen() {
 
       {/* Elegant minimalist loader container (no card borders/backgrounds) */}
       <div className="text-center space-y-8 z-10 max-w-sm w-full px-4">
-        
+
         {/* Animated Brand Logo */}
         <div className="flex justify-center">
           <div className="relative animate-bounce duration-[1500ms]">
