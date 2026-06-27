@@ -683,25 +683,34 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
                 </div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">What our users say</span>
               </div>
-              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {[
-                  { initials: "RV", name: "Rahul Verma", role: "SDE @ Flipkart", color: "from-violet-500 to-purple-600", quote: "LinkedIn reach tripled in 3 weeks. Insanely good quality." },
-                  { initials: "PS", name: "Priya Sharma", role: "Founder @ BuildFast", color: "from-emerald-500 to-teal-600", quote: "I post every day now. No more blank screen." },
-                  { initials: "AK", name: "Arjun Kumar", role: "PM @ Razorpay", color: "from-orange-500 to-red-500", quote: "10x faster content. Followers doubled in a month." },
-                  { initials: "NK", name: "Neha Kapoor", role: "Dev Advocate", color: "from-blue-500 to-cyan-500", quote: "AI understands tech. My posts actually perform now." },
-                  { initials: "MS", name: "Mohit Singh", role: "CTO @ Stackify", color: "from-rose-500 to-pink-600", quote: "Saved 2+ hours a week. Worth every rupee." },
-                ].map((r, idx) => (
-                  <div key={idx} className="flex items-start gap-2.5 bg-white border border-slate-200/80 rounded-xl px-3.5 py-3 shrink-0 w-[200px] snap-start shadow-sm">
-                    <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${r.color} flex items-center justify-center text-white font-bold text-[9px] shrink-0`}>
-                      {r.initials}
+              {/* Marquee track */}
+              <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent_0%,black_10%,black_90%,transparent_100%)]">
+                <div className="flex gap-3 animate-marquee-reviews w-max pb-1">
+                  {[
+                    { initials: "RV", name: "Rahul Verma", role: "SDE @ Flipkart", color: "from-violet-500 to-purple-600", quote: "LinkedIn reach tripled in 3 weeks. Insanely good quality." },
+                    { initials: "PS", name: "Priya Sharma", role: "Founder @ BuildFast", color: "from-emerald-500 to-teal-600", quote: "I post every day now. No more blank screen." },
+                    { initials: "AK", name: "Arjun Kumar", role: "PM @ Razorpay", color: "from-orange-500 to-red-500", quote: "10x faster content. Followers doubled in a month." },
+                    { initials: "NK", name: "Neha Kapoor", role: "Dev Advocate", color: "from-blue-500 to-cyan-500", quote: "AI understands tech. My posts actually perform now." },
+                    { initials: "MS", name: "Mohit Singh", role: "CTO @ Stackify", color: "from-rose-500 to-pink-600", quote: "Saved 2+ hours a week. Worth every rupee." },
+                    // Duplicate set for seamless loop
+                    { initials: "RV", name: "Rahul Verma", role: "SDE @ Flipkart", color: "from-violet-500 to-purple-600", quote: "LinkedIn reach tripled in 3 weeks. Insanely good quality." },
+                    { initials: "PS", name: "Priya Sharma", role: "Founder @ BuildFast", color: "from-emerald-500 to-teal-600", quote: "I post every day now. No more blank screen." },
+                    { initials: "AK", name: "Arjun Kumar", role: "PM @ Razorpay", color: "from-orange-500 to-red-500", quote: "10x faster content. Followers doubled in a month." },
+                    { initials: "NK", name: "Neha Kapoor", role: "Dev Advocate", color: "from-blue-500 to-cyan-500", quote: "AI understands tech. My posts actually perform now." },
+                    { initials: "MS", name: "Mohit Singh", role: "CTO @ Stackify", color: "from-rose-500 to-pink-600", quote: "Saved 2+ hours a week. Worth every rupee." },
+                  ].map((r, idx) => (
+                    <div key={idx} className="flex items-start gap-2.5 bg-white border border-slate-200/80 rounded-xl px-3.5 py-3 shrink-0 w-[200px] shadow-sm">
+                      <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${r.color} flex items-center justify-center text-white font-bold text-[9px] shrink-0`}>
+                        {r.initials}
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-bold text-slate-800 block truncate">{r.name}</span>
+                        <span className="text-[9px] text-slate-400 block truncate mb-1">{r.role}</span>
+                        <p className="text-[10px] text-slate-600 leading-relaxed italic line-clamp-2">&ldquo;{r.quote}&rdquo;</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <span className="text-[10px] font-bold text-slate-800 block truncate">{r.name}</span>
-                      <span className="text-[9px] text-slate-400 block truncate mb-1">{r.role}</span>
-                      <p className="text-[10px] text-slate-600 leading-relaxed italic line-clamp-2">&ldquo;{r.quote}&rdquo;</p>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
