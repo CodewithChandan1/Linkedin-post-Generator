@@ -38,7 +38,7 @@ import { getNextFormat, advanceRotation, computeDepthScore } from "@/lib/formatR
 import {
   Wrench, Search, Target, Trophy, Calendar, Newspaper,
   MessageSquare, Eye, Sparkles, FileText, Video,
-  RotateCcw, Check,
+  RotateCcw, Check, PenTool,
 } from "lucide-react";
 
 export default function Home() {
@@ -544,14 +544,7 @@ export default function Home() {
   }
 
   if (authLoading) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center font-sans">
-        <div className="p-3 bg-blue-600/10 rounded-2xl border border-blue-500/20 shadow-xl mb-4 animate-pulse">
-          <div className="w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin" />
-        </div>
-        <p className="text-sm font-medium text-slate-400">Loading personalized experience...</p>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!user) {
@@ -900,6 +893,77 @@ export default function Home() {
           showToast("Successfully upgraded to Pro Creator!");
         }}
       />
+    </div>
+  );
+}
+
+function LoadingScreen() {
+  const [loadMsgIndex, setLoadMsgIndex] = useState(0);
+  const messages = [
+    "Authenticating session...",
+    "Polishing draft presets...",
+    "Syncing topic DNA metrics...",
+    "Loading dashboard preferences...",
+    "Warming up generation models..."
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLoadMsgIndex((prev) => (prev + 1) % messages.length);
+    }, 1200);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-[#f3f2ef] flex flex-col items-center justify-center font-sans relative overflow-hidden">
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes loading-bar {
+          0% { left: -100%; width: 50%; }
+          50% { left: 30%; width: 40%; }
+          100% { left: 100%; width: 50%; }
+        }
+        @keyframes fade-in-up {
+          from { opacity: 0; transform: translateY(4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-loading-bar {
+          animation: loading-bar 2s ease-in-out infinite;
+        }
+        .animate-fade-in-up {
+          animation: fade-in-up 0.3s ease-out forwards;
+        }
+      `}</style>
+
+      {/* BACKGROUND DECORATIVE GRID */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-60 pointer-events-none" />
+
+      {/* Main loading card */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-8 max-w-sm w-full text-center space-y-6 relative overflow-hidden shadow-xl z-10">
+        <div className="flex justify-center">
+          <div className="relative">
+            {/* Glowing pulse ring */}
+            <div className="absolute inset-0 rounded-2xl bg-[#0A66C2]/10 animate-ping duration-1000" />
+            {/* Main icon container */}
+            <div className="relative p-4 bg-white border border-slate-200 text-[#0A66C2] rounded-2xl shadow-md animate-bounce">
+              <PenTool size={36} className="stroke-[2.5]" />
+            </div>
+          </div>
+        </div>
+
+        {/* Text Area */}
+        <div className="space-y-1.5 h-12 flex flex-col justify-center">
+          <h3 className="font-extrabold text-slate-800 text-base tracking-tight">DevPost AI</h3>
+          <p key={loadMsgIndex} className="text-xs text-slate-500 font-semibold animate-fade-in-up">
+            {messages[loadMsgIndex]}
+          </p>
+        </div>
+
+        {/* Loading Progress Bar */}
+        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden relative">
+          <div className="absolute top-0 bottom-0 left-0 bg-[#0A66C2] rounded-full w-2/3 animate-loading-bar" />
+        </div>
+      </div>
     </div>
   );
 }
