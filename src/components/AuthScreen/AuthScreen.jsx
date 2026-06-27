@@ -528,7 +528,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-60 pointer-events-none" />
 
       {/* LEFT COLUMN: HERO SHOWCASE PANEL (Only visible on medium and larger screens) */}
-      <div className="hidden md:flex md:w-1/2 lg:w-3/5 relative overflow-y-auto flex-col justify-between p-10 lg:p-14 border-r border-slate-200 z-10 h-full">
+      <div className="hidden md:flex md:w-1/2 lg:w-3/5 relative overflow-y-auto flex-col justify-between p-8 lg:p-10 pb-5 lg:pb-6 border-r border-slate-200 z-10 h-full">
 
         {/* Brand header */}
         <div className="flex items-center gap-2 z-10 mb-4">
@@ -536,12 +536,12 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
         </div>
 
         {/* Hero copy and mockup card */}
-        <div className="my-auto space-y-10 z-10 max-w-lg">
-          <div className="space-y-4">
-            <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-slate-800 leading-tight">
+        <div className="my-auto space-y-6 lg:space-y-8 z-10 max-w-lg">
+          <div className="space-y-2.5">
+            <h1 className="text-3xl lg:text-4xl xl:text-5xl font-black tracking-tight text-slate-800 leading-tight">
               Grow your <span className="text-[#0A66C2]">LinkedIn influence</span>
             </h1>
-            <p className="text-slate-500 text-sm font-medium leading-relaxed">
+            <p className="text-slate-500 text-xs lg:text-sm font-medium leading-relaxed">
               Design premium, developer-focused content, threads, and seeding comments in seconds using specialized AI tailored to your stack.
             </p>
           </div>
@@ -552,47 +552,47 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
             <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-[90%] h-4 bg-[#0A66C2] rounded-full opacity-10 animate-shadow-pulse pointer-events-none" />
 
             {/* The physical floating card */}
-            <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xl hover:shadow-2xl preserve-3d animate-float-slow hover:[transform:rotateX(2deg)_rotateY(-4deg)_translateZ(10px)] transition-transform duration-500 pointer-events-auto">
-              <div className="absolute top-3 right-3 text-[#0A66C2] opacity-20">
-                <Sparkles size={24} />
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-4 lg:p-5 shadow-xl hover:shadow-2xl preserve-3d animate-float-slow hover:[transform:rotateX(2deg)_rotateY(-4deg)_translateZ(10px)] transition-transform duration-500 pointer-events-auto">
+              <div className="absolute top-2.5 right-2.5 text-[#0A66C2] opacity-20">
+                <Sparkles size={20} />
               </div>
-
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0A66C2] to-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-inner">
+ 
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0A66C2] to-blue-500 flex items-center justify-center text-white font-bold text-xs shadow-inner">
                   CK
                 </div>
                 <div>
-                  <div className="font-bold text-sm text-slate-800">Chandan Kushwaha</div>
-                  <div className="text-xs text-slate-400 font-medium">Software Engineer | Building cool things</div>
+                  <div className="font-bold text-xs text-slate-800">Chandan Kushwaha</div>
+                  <div className="text-[10px] text-slate-400 font-medium">Software Engineer | Building cool things</div>
                 </div>
               </div>
-
-              <div className="space-y-2 mb-4">
-                <p className="text-xs text-slate-700 leading-relaxed font-mono">
+ 
+              <div className="space-y-1.5 mb-3">
+                <p className="text-[11px] text-slate-700 leading-relaxed font-mono">
                   Just integrated Lazy Email Verification into the Next.js SaaS architecture!
                 </p>
-                <p className="text-xs text-slate-600 leading-relaxed font-mono">
+                <p className="text-[11px] text-slate-600 leading-relaxed font-mono">
                   Instead of blocking registration, verify email address only when activating premium notifications. Better UX = Higher conversion.
                 </p>
               </div>
-
-              <div className="flex gap-2">
-                <span className="text-[10px] font-bold text-[#0A66C2] bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
+ 
+              <div className="flex gap-1.5">
+                <span className="text-[9px] font-bold text-[#0A66C2] bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
                   #NextJS
                 </span>
-                <span className="text-[10px] font-bold text-[#0A66C2] bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100">
+                <span className="text-[9px] font-bold text-[#0A66C2] bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
                   #SaaS
                 </span>
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
+                <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
                   #Development
                 </span>
               </div>
             </div>
           </div>
         </div>
-
+ 
         {/* Stats row */}
-        <div className="grid grid-cols-3 gap-6 pt-8 border-t border-slate-200 z-10">
+        <div className="grid grid-cols-3 gap-4 pt-6 border-t border-slate-200 z-10">
           <div>
             <div className="text-xl lg:text-2xl font-black text-slate-800">5k+</div>
             <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Posts Created</div>
@@ -606,10 +606,10 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
             <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">User Rating</div>
           </div>
         </div>
-
+ 
         {/* Auto-scrolling reviews marquee */}
-        <div className="pt-6 z-10 overflow-hidden">
-          <div className="flex items-center gap-2 mb-3">
+        <div className="pt-4 z-10 overflow-hidden">
+          <div className="flex items-center gap-2 mb-2">
             <div className="flex">
               {[1, 2, 3, 4, 5].map(i => (
                 <svg key={i} className="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
@@ -619,22 +619,22 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
           </div>
 
           {/* Marquee track */}
-          <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent_0%,black_5%,black_95%,transparent_100%)]">
-            <div className="flex gap-3 animate-marquee-reviews w-max">
+          <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent_0%,black_5%,black_95%,transparent_100%)] py-2">
+            <div className="flex gap-3 animate-marquee-reviews w-max py-0.5">
               {[
-                { initials: "RV", name: "Rahul Verma", role: "SDE @ Flipkart", color: "from-violet-500 to-purple-600", quote: "LinkedIn reach tripled in 3 weeks. Insanely good post quality." },
+                { initials: "RV", name: "Rahul Verma", role: "SDE @ Flipkart", color: "from-violet-500 to-purple-600", quote: "LinkedIn reach tripled in 3 weeks. Insanely good quality." },
                 { initials: "PS", name: "Priya Sharma", role: "Founder @ BuildFast", color: "from-emerald-500 to-teal-600", quote: "I post every day now. No more blank screen." },
-                { initials: "AK", name: "Arjun Kumar", role: "PM @ Razorpay", color: "from-orange-500 to-red-500", quote: "10x faster content. My followers doubled in a month." },
-                { initials: "NK", name: "Neha Kapoor", role: "Dev Advocate", color: "from-blue-500 to-cyan-500", quote: "The AI understands tech content. My posts actually perform now." },
+                { initials: "AK", name: "Arjun Kumar", role: "PM @ Razorpay", color: "from-orange-500 to-red-500", quote: "10x faster content. Followers doubled in a month." },
+                { initials: "NK", name: "Neha Kapoor", role: "Dev Advocate", color: "from-blue-500 to-cyan-500", quote: "AI understands tech. My posts actually perform." },
                 { initials: "MS", name: "Mohit Singh", role: "CTO @ Stackify", color: "from-rose-500 to-pink-600", quote: "Saved 2+ hours a week. Worth every rupee." },
                 // Duplicate set for seamless loop
-                { initials: "RV", name: "Rahul Verma", role: "SDE @ Flipkart", color: "from-violet-500 to-purple-600", quote: "LinkedIn reach tripled in 3 weeks. Insanely good post quality." },
+                { initials: "RV", name: "Rahul Verma", role: "SDE @ Flipkart", color: "from-violet-500 to-purple-600", quote: "LinkedIn reach tripled in 3 weeks. Insanely good quality." },
                 { initials: "PS", name: "Priya Sharma", role: "Founder @ BuildFast", color: "from-emerald-500 to-teal-600", quote: "I post every day now. No more blank screen." },
-                { initials: "AK", name: "Arjun Kumar", role: "PM @ Razorpay", color: "from-orange-500 to-red-500", quote: "10x faster content. My followers doubled in a month." },
-                { initials: "NK", name: "Neha Kapoor", role: "Dev Advocate", color: "from-blue-500 to-cyan-500", quote: "The AI understands tech content. My posts actually perform now." },
+                { initials: "AK", name: "Arjun Kumar", role: "PM @ Razorpay", color: "from-orange-500 to-red-500", quote: "10x faster content. Followers doubled in a month." },
+                { initials: "NK", name: "Neha Kapoor", role: "Dev Advocate", color: "from-blue-500 to-cyan-500", quote: "AI understands tech. My posts actually perform." },
                 { initials: "MS", name: "Mohit Singh", role: "CTO @ Stackify", color: "from-rose-500 to-pink-600", quote: "Saved 2+ hours a week. Worth every rupee." },
               ].map((r, idx) => (
-                <div key={idx} className="flex items-start gap-2.5 bg-white/80 border border-slate-100 rounded-xl px-3.5 py-2.5 backdrop-blur-sm shrink-0 w-[260px]">
+                <div key={idx} className="flex items-start gap-2 bg-white/80 border border-slate-100 rounded-xl px-3 py-2.5 backdrop-blur-sm shrink-0 w-[240px]">
                   <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${r.color} flex items-center justify-center text-white font-bold text-[9px] shrink-0`}>
                     {r.initials}
                   </div>
@@ -643,7 +643,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
                       <span className="text-[10px] font-bold text-slate-800 truncate">{r.name}</span>
                     </div>
                     <div className="text-[9px] text-slate-400 mb-1 truncate">{r.role}</div>
-                    <p className="text-[10px] text-slate-600 leading-relaxed italic line-clamp-3">&ldquo;{r.quote}&rdquo;</p>
+                    <p className="text-[10px] text-slate-600 leading-relaxed italic line-clamp-2">&ldquo;{r.quote}&rdquo;</p>
                   </div>
                 </div>
               ))}
@@ -702,29 +702,29 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">What our users say</span>
               </div>
               {/* Marquee track */}
-              <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent_0%,black_5%,black_95%,transparent_100%)]">
-                <div className="flex gap-3 animate-marquee-reviews w-max pb-1">
+              <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent_0%,black_5%,black_95%,transparent_100%)] py-2">
+                <div className="flex gap-3 animate-marquee-reviews w-max py-0.5">
                   {[
                     { initials: "RV", name: "Rahul Verma", role: "SDE @ Flipkart", color: "from-violet-500 to-purple-600", quote: "LinkedIn reach tripled in 3 weeks. Insanely good quality." },
                     { initials: "PS", name: "Priya Sharma", role: "Founder @ BuildFast", color: "from-emerald-500 to-teal-600", quote: "I post every day now. No more blank screen." },
                     { initials: "AK", name: "Arjun Kumar", role: "PM @ Razorpay", color: "from-orange-500 to-red-500", quote: "10x faster content. Followers doubled in a month." },
-                    { initials: "NK", name: "Neha Kapoor", role: "Dev Advocate", color: "from-blue-500 to-cyan-500", quote: "AI understands tech. My posts actually perform now." },
+                    { initials: "NK", name: "Neha Kapoor", role: "Dev Advocate", color: "from-blue-500 to-cyan-500", quote: "AI understands tech. My posts actually perform." },
                     { initials: "MS", name: "Mohit Singh", role: "CTO @ Stackify", color: "from-rose-500 to-pink-600", quote: "Saved 2+ hours a week. Worth every rupee." },
                     // Duplicate set for seamless loop
                     { initials: "RV", name: "Rahul Verma", role: "SDE @ Flipkart", color: "from-violet-500 to-purple-600", quote: "LinkedIn reach tripled in 3 weeks. Insanely good quality." },
                     { initials: "PS", name: "Priya Sharma", role: "Founder @ BuildFast", color: "from-emerald-500 to-teal-600", quote: "I post every day now. No more blank screen." },
                     { initials: "AK", name: "Arjun Kumar", role: "PM @ Razorpay", color: "from-orange-500 to-red-500", quote: "10x faster content. Followers doubled in a month." },
-                    { initials: "NK", name: "Neha Kapoor", role: "Dev Advocate", color: "from-blue-500 to-cyan-500", quote: "AI understands tech. My posts actually perform now." },
+                    { initials: "NK", name: "Neha Kapoor", role: "Dev Advocate", color: "from-blue-500 to-cyan-500", quote: "AI understands tech. My posts actually perform." },
                     { initials: "MS", name: "Mohit Singh", role: "CTO @ Stackify", color: "from-rose-500 to-pink-600", quote: "Saved 2+ hours a week. Worth every rupee." },
                   ].map((r, idx) => (
-                    <div key={idx} className="flex items-start gap-2.5 bg-white border border-slate-200/80 rounded-xl px-3.5 py-3 shrink-0 w-[260px] shadow-sm">
+                    <div key={idx} className="flex items-start gap-2 bg-white border border-slate-200/80 rounded-xl px-3 py-2.5 shrink-0 w-[240px] shadow-sm">
                       <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${r.color} flex items-center justify-center text-white font-bold text-[9px] shrink-0`}>
                         {r.initials}
                       </div>
                       <div className="min-w-0">
                         <span className="text-[10px] font-bold text-slate-800 block truncate">{r.name}</span>
                         <span className="text-[9px] text-slate-400 block truncate mb-1">{r.role}</span>
-                        <p className="text-[10px] text-slate-600 leading-relaxed italic line-clamp-3">&ldquo;{r.quote}&rdquo;</p>
+                        <p className="text-[10px] text-slate-600 leading-relaxed italic line-clamp-2">&ldquo;{r.quote}&rdquo;</p>
                       </div>
                     </div>
                   ))}
