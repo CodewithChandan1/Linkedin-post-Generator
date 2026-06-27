@@ -85,8 +85,24 @@ src/
   open. True background scheduling (server cron) comes with the backend in a
   later phase.
 
-## Next phases
+## What is done so far
 
-See the PRD for the full roadmap: email reminders (Phase 2), LinkedIn OAuth
-(Phase 3), trending news scanner (Phase 4), algorithm intelligence layer
-(Phase 5), and the growth dashboard (Phase 6).
+- Phase 1 ✅ MVP — AI post generator, LinkedIn-style UI, topic rotation, persistent history
+- Phase 2 ✅ Reminders — email, push notifications, best-time algorithm, settings modal
+- Phase 3 ✅ LinkedIn OAuth — one-click publish with image upload
+- Phase 4 ✅ Trending — GitHub/HN/dev.to/npm scanner, breaking news mode
+- Phase 5 ✅ Algorithm Intelligence Layer — see below
+- Phase 6 🔜 Growth Dashboard — newsletter, strategic commenting, opportunity tracking
+
+## What is in Phase 5 — Algorithm Intelligence Layer
+
+- **AI Humanizer layer** — second Gemini pass injects Chandan real voice, projects, and metrics to bypass LinkedIn AI-detection penalty (-30% reach, -55% engagement). One-click Humanize button on every post.
+- **Depth Score optimizer** — real-time score (0-100) measuring post length, structure, closing question, and Save CTA. Shows improvement tips inline.
+- **PDF Carousel generator** — Gemini generates multi-slide content, html2canvas + jsPDF builds a branded 1080x1350px PDF. 6.6% avg engagement vs 2% for text.
+- **Format rotation logic** — automatically alternates text > carousel > poll to avoid LinkedIn 20% consecutive-format penalty.
+- **Follower growth CTA rotation** — every 7th generated post auto-appends a strategic follower nudge line.
+- **Golden Hour engagement assistant** — 90-minute countdown timer activates after posting with milestone alerts (T+0, T+30, T+60, T+90 min) + 3 copy-paste reply templates.
+- **Topic DNA tracker** — sidebar panel showing posts per topic in last 30 days, authority levels, and 14-day gap warnings.
+- **Pre-post comment seeding** — add trusted developer friends once, get personalized DM templates to send 10 min before posting.
+- **LinkedIn Profile SEO Auditor** — one-time audit: optimized 150+ char headline, About opener, missing recruiter keywords, top 3 skills to pin.
+- **Opportunity Tracker** — log recruiter DMs, freelance inquiries, collaborations, speaking invites; monthly ROI dashboard.

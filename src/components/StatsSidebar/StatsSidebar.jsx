@@ -1,5 +1,6 @@
 import { getTodayTopic } from "@/lib/profile";
 import { getBestTime, tierColor } from "@/lib/bestTime";
+import { Lightbulb } from "lucide-react";
 
 export default function StatsSidebar({ posts, settings, onOpenSettings }) {
   const total = posts.length;
@@ -42,15 +43,17 @@ export default function StatsSidebar({ posts, settings, onOpenSettings }) {
         {settings && (
           <p className="text-xs text-gray-500 mt-2">
             {settings.reminderEnabled
-              ? `🔔 Daily reminder at ${settings.reminderTime}`
-              : "🔕 Reminders off"}
+              ? `Daily reminder at ${settings.reminderTime}`
+              : "Reminders off"}
             {settings.pushEnabled ? " · push on" : ""}
           </p>
         )}
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <h3 className="font-semibold text-gray-900 text-sm mb-2">💡 Algorithm tip</h3>
+        <h3 className="font-semibold text-gray-900 text-sm mb-2 flex items-center gap-1.5">
+          <Lightbulb size={14} className="text-amber-500" /> Algorithm tip
+        </h3>
         <p className="text-xs text-gray-600 leading-relaxed">
           Reply to your first comment within 10 minutes of posting — author replies in the
           golden hour drive 64% more comments and 2.3x more views.

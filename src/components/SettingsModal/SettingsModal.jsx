@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TOPIC_FILTERS } from "@/lib/settings";
 import { getBestTime, tierColor } from "@/lib/bestTime";
+import { Check, Bell, BellOff } from "lucide-react";
 import {
   sendReminderEmail,
   emailConfigured,
@@ -10,7 +11,7 @@ import {
 } from "@/lib/reminders";
 
 export default function SettingsModal({ open, onClose, settings, onSave, todaysPost }) {
-  const [draft, setDraft] = useState(settings);
+  const [draft, setDraft] = useState(settings || {});
   const [emailStatus, setEmailStatus] = useState("");
   const [pushStatus, setPushStatus] = useState(notificationPermission());
 
@@ -41,6 +42,7 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
     setEmailStatus("sending");
     try {
       await sendReminderEmail({ email: draft.email, post: todaysPost, bestTime });
+      await fetch("/api/settings/increment-emails", { method: "POST" }).catch(() => {});
       setEmailStatus("sent");
     } catch (e) {
       setEmailStatus(e.message || "failed");
@@ -58,9 +60,7 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
           <h2 className="font-semibold text-gray-900">Reminder settings</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">
-            ×
-          </button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
         </div>
 
         <div className="px-5 py-4 space-y-5">
@@ -76,7 +76,7 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
             />
           </div>
 
-          {/* Reminder time + best time */}
+          {/* Reminder time */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Daily reminder time</label>
             <div className="flex items-center gap-3">
@@ -104,21 +104,27 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
           <div className="space-y-3">
             <Toggle
               label="Daily email reminder"
+              icon={<Bell size={14} />}
               checked={draft.reminderEnabled}
               onChange={(v) => update({ reminderEnabled: v })}
             />
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-700">Browser push notifications</p>
-                {!notificationsSupported() && (
-                  <p className="text-xs text-gray-400">Not supported in this browser</p>
-                )}
-                {pushStatus === "denied" && (
-                  <p className="text-xs text-red-500">Blocked — enable in browser settings</p>
-                )}
+              <div className="flex items-center gap-2">
+                <BellOff size={14} className="text-gray-500" />
+                <div>
+                  <p className="text-sm text-gray-700">Browser push notifications</p>
+                  {!notificationsSupported() && (
+                    <p className="text-xs text-gray-400">Not supported in this browser</p>
+                  )}
+                  {pushStatus === "denied" && (
+                    <p className="text-xs text-red-500">Blocked — enable in browser settings</p>
+                  )}
+                </div>
               </div>
               {pushStatus === "granted" ? (
-                <span className="text-xs text-green-700 bg-green-50 px-2 py-1 rounded-full">Enabled</span>
+                <span className="text-xs text-green-700 bg-green-50 px-2 py-1 rounded-full flex items-center gap-1">
+                  <Check size={11} /> Enabled
+                </span>
               ) : (
                 <button
                   onClick={handleEnablePush}
@@ -131,7 +137,7 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
             </div>
           </div>
 
-          {/* Topic relevance filters */}
+          {/* Topic filters */}
           <div>
             <p className="text-sm font-medium text-gray-700 mb-2">Topics to track</p>
             <div className="flex flex-wrap gap-2">
@@ -140,7 +146,7 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
                   key={topic}
                   onClick={() => toggleTopic(topic)}
                   className={`text-xs px-3 py-1 rounded-full border transition ${
-                    draft.topics[topic]
+                    draft.topics?.[topic]
                       ? "bg-linkedin text-white border-linkedin"
                       : "bg-white text-gray-500 border-gray-300"
                   }`}
@@ -166,7 +172,9 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
               </p>
             )}
             {emailStatus === "sent" && (
-              <p className="text-xs text-green-600 mt-1">Test email sent ✓</p>
+              <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                <Check size={12} /> Test email sent
+              </p>
             )}
             {emailStatus && !["sending", "sent"].includes(emailStatus) && (
               <p className="text-xs text-red-500 mt-1">{emailStatus}</p>
@@ -190,10 +198,13 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
   );
 }
 
-function Toggle({ label, checked, onChange }) {
+function Toggle({ label, icon, checked, onChange }) {
   return (
     <div className="flex items-center justify-between">
-      <p className="text-sm text-gray-700">{label}</p>
+      <p className="text-sm text-gray-700 flex items-center gap-2">
+        {icon && <span className="text-gray-500">{icon}</span>}
+        {label}
+      </p>
       <button
         role="switch"
         aria-checked={checked}

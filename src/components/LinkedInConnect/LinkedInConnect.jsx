@@ -1,4 +1,5 @@
-import { LinkedInLogo } from "./Icons";
+import { LinkedInLogo } from "@/components/Icons/Icons";
+import { Check } from "lucide-react";
 
 export default function LinkedInConnect({ linkedin }) {
   const { isConnected, connection, daysUntilExpiry, connect, disconnect, error, clearError } = linkedin;
@@ -15,14 +16,14 @@ export default function LinkedInConnect({ linkedin }) {
             />
           ) : (
             <div className="w-9 h-9 rounded-full bg-linkedin flex items-center justify-center">
-              <LinkedInLogo className="w-5 h-5 [&>path]:fill-white" />
+              <LinkedInLogo size={18} color="white" />
             </div>
           )}
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-gray-900 truncate">
               {connection.name || "LinkedIn Connected"}
             </p>
-            <p className="text-xs text-green-600">✓ Connected</p>
+            <p className="text-xs text-green-600 flex items-center gap-1"><Check size={12} /> Connected</p>
           </div>
         </div>
         <div className="flex items-center justify-between">
@@ -47,7 +48,7 @@ export default function LinkedInConnect({ linkedin }) {
         onClick={connect}
         className="w-full flex items-center justify-center gap-2 bg-linkedin hover:bg-linkedin-hover text-white text-sm font-medium py-2.5 rounded-full transition"
       >
-        <LinkedInLogo className="w-4 h-4 [&>path]:fill-white" />
+        <LinkedInLogo size={16} color="white" />
         Connect LinkedIn
       </button>
       {error && (

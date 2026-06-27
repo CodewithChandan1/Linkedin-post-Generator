@@ -1,10 +1,16 @@
 import nodemailer from "nodemailer";
-import { profile, getTodayTopic } from "@/lib/profile";
+import { getTodayTopic } from "@/lib/profile";
 import { getBestTime } from "@/lib/bestTime";
+import { getSessionUser } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
 export async function POST(req) {
+  const user = await getSessionUser();
+  if (!user) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const gmailUser = process.env.GMAIL_USER;
   const gmailPass = process.env.GMAIL_APP_PASSWORD;
 
@@ -15,7 +21,7 @@ export async function POST(req) {
     );
   }
 
-  let toEmail = profile.email;
+  let toEmail = user.email || user.profile?.email;
   let postPreview = "";
   try {
     const body = await req.json();
@@ -23,6 +29,10 @@ export async function POST(req) {
     if (body?.postPreview) postPreview = body.postPreview;
   } catch {
     // use default
+  }
+
+  if (!toEmail) {
+    return Response.json({ error: "No destination email found" }, { status: 400 });
   }
 
   const today = new Date().toLocaleDateString("en-US", {
@@ -62,7 +72,7 @@ export async function POST(req) {
             <tr><td style="padding:28px 28px 24px;">
 
               <p style="margin:0 0 14px; font-size:15px; color:#1D2226; line-height:1.5;">
-                Hi there,<br>Your LinkedIn post for today is ready to publish! 🎉
+                Hi ${user.profile?.name || "there"},<br>Your LinkedIn post for today is ready to publish! 🎉
               </p>
 
               <!-- Post Preview -->
@@ -105,6 +115,20 @@ export async function POST(req) {
       subject: `🚀 Your LinkedIn post for ${today} is ready!`,
       html,
     });
+
+    // Increment email counter in settings database
+    try {
+      const { connectDB } = await import("@/lib/db");
+      const Settings = (await import("@/models/Settings")).default;
+      await connectDB();
+      await Settings.findOneAndUpdate(
+        { userId: user._id.toString() },
+        { $inc: { emailsSentCount: 1 } },
+        { upsert: true }
+      );
+    } catch (dbErr) {
+      console.error("Failed to increment email sent count in send-reminder route:", dbErr);
+    }
 
     return Response.json({ success: true, to: toEmail });
   } catch (err) {

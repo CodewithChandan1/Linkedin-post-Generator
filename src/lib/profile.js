@@ -7,13 +7,14 @@ export const profile = {
   initials: "CK",
   stack: ["React", "Next.js", "Node.js", "MongoDB", "Web3", "Blockchain", "ICP", "TypeScript"],
   achievements: [
-    "Built BlockseBlock — scaled from scratch to 10,000+ users",
-    "Reduced API latency by 60%",
-    "Shipped SipnPlay and LearnBlockseBlock",
+    "Built and shipped multiple production apps serving thousands of users",
+    "Reduced API latency by 60% in a production system",
     "15,000+ users served across projects",
     "10,000+ participants in competitions organized",
   ],
-  projects: ["BlockseBlock", "SipnPlay", "LearnBlockseBlock"],
+  // NOTE: Do NOT mention company project names (BlockseBlock, SipnPlay, LearnBlockseBlock)
+  // in public LinkedIn posts. Use generic descriptions instead.
+  projects: ["my LinkedIn automation tool", "production full-stack apps", "Web3 projects on ICP blockchain"],
 };
 
 // Topic rotation by day of week (0 = Sunday ... 6 = Saturday).
