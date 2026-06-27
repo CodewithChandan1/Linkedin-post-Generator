@@ -11,6 +11,7 @@ import {
   PenLine,
   Flame,
   Share2,
+  ImageDown,
 } from "lucide-react";
 
 // Inline social SVGs to avoid package version mismatch issues
@@ -46,11 +47,12 @@ function formatDate(dateStr) {
   return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 }
 
-export default function PostCard({ post, profile, onPost, onRegenerate, onEdit, onDelete, isToday = false }) {
+export default function PostCard({ post, profile, onPost, onRegenerate, onRegenerateImage, onEdit, onDelete, isToday = false }) {
   const [copied, setCopied] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [shareMenuOpen, setShareMenuOpen] = useState(false);
   const [posting, setPosting] = useState(false);
+  const [imgRegenerating, setImgRegenerating] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -107,6 +109,15 @@ export default function PostCard({ post, profile, onPost, onRegenerate, onEdit, 
     } finally {
       setPosting(false);
     }
+  }
+
+  async function handleDownloadImage() {
+    const { downloadBrandedImage } = await import("@/lib/brandedImage");
+    downloadBrandedImage({
+      text: post.content,
+      name: authorName,
+      headline: authorHeadline,
+    });
   }
 
   return (
@@ -209,7 +220,7 @@ export default function PostCard({ post, profile, onPost, onRegenerate, onEdit, 
 
       {/* Body */}
       <div className="px-4 py-2">
-        <p className="text-[15px] text-gray-800 whitespace-pre-wrap leading-relaxed">
+        <p className="text-[15px] text-gray-800 whitespace-pre-wrap break-words leading-relaxed">
           {displayContent}
         </p>
         {isLong && !expanded && (
@@ -229,17 +240,37 @@ export default function PostCard({ post, profile, onPost, onRegenerate, onEdit, 
           </button>
         )}
         {post.hashtags?.length > 0 && (
-          <p className="text-linkedin text-sm mt-3">{post.hashtags.join(" ")}</p>
+          <p className="text-linkedin text-sm mt-3 break-words">{post.hashtags.join(" ")}</p>
         )}
         {post.imageUrl && (
           <div className="mt-3 rounded-lg overflow-hidden border border-gray-100 relative group">
             <img
+              key={post.imageUrl}
               src={post.imageUrl}
               alt={post.imagePrompt || "AI generated visual"}
               className="w-full h-auto object-cover max-h-80"
               loading="lazy"
+              onLoad={() => setImgRegenerating(false)}
+              onError={() => setImgRegenerating(false)}
             />
-            <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            {imgRegenerating && (
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                <span className="flex items-center gap-2 text-white text-xs font-medium">
+                  <RefreshCw size={14} className="animate-spin" /> Generating new image…
+                </span>
+              </div>
+            )}
+            <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              {onRegenerateImage && post.imagePrompt && post.status !== "posted" && (
+                <button
+                  onClick={() => { setImgRegenerating(true); onRegenerateImage(post); }}
+                  disabled={imgRegenerating}
+                  title="Generate a new image — keeps your post text"
+                  className="bg-black/80 hover:bg-black text-white text-[11px] px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-md font-medium transition disabled:opacity-60"
+                >
+                  <RefreshCw size={12} className={imgRegenerating ? "animate-spin" : ""} /> Regenerate
+                </button>
+              )}
               <button
                 onClick={async () => {
                   const { downloadCleanImage } = await import("@/lib/imageUtils");
@@ -253,14 +284,24 @@ export default function PostCard({ post, profile, onPost, onRegenerate, onEdit, 
           </div>
         )}
         {post.imagePrompt && !post.imageUrl && (
-          <p className="text-xs text-gray-400 mt-3 italic border-l-2 border-gray-200 pl-2 flex items-center gap-1.5">
-            <Palette size={12} className="shrink-0" /> Image idea: {post.imagePrompt}
-          </p>
+          <div className="mt-3 flex items-start justify-between gap-2 border-l-2 border-gray-200 pl-2">
+            <p className="text-xs text-gray-400 italic flex items-center gap-1.5">
+              <Palette size={12} className="shrink-0" /> Image idea: {post.imagePrompt}
+            </p>
+            {onRegenerateImage && post.status !== "posted" && (
+              <button
+                onClick={() => onRegenerateImage(post)}
+                className="shrink-0 text-[11px] text-linkedin hover:underline font-medium whitespace-nowrap"
+              >
+                Generate image
+              </button>
+            )}
+          </div>
         )}
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-2 px-4 py-3 border-t border-gray-100 mt-2">
+      <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-t border-gray-100 mt-2">
         {post.status === "posted" ? (
           <button
             disabled
@@ -289,6 +330,14 @@ export default function PostCard({ post, profile, onPost, onRegenerate, onEdit, 
             <Copy size={15} />
           )}
           {copied ? "Copied" : "Copy"}
+        </button>
+
+        <button
+          onClick={handleDownloadImage}
+          title="Download a branded 9:16 image for mobile"
+          className="flex items-center gap-1.5 text-sm text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded-full border border-gray-200 transition"
+        >
+          <ImageDown size={15} /> Image
         </button>
 
         <div className="relative" ref={shareRef}>

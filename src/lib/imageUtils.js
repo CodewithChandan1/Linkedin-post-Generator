@@ -2,6 +2,23 @@
  * Utility to manipulate images client-side, specifically stripping EXIF/metadata.
  */
 
+const IMAGE_STYLE_SUFFIX =
+  ", realistic, natural, cinematic, professional, clean, minimal, tech aesthetic, LinkedIn post visual";
+
+/**
+ * Builds a pollinations.ai image URL from a raw image prompt.
+ * Pass a `seed` to get a different image for the same prompt (used to regenerate
+ * just the visual without touching the post content).
+ * @param {string} prompt raw imagePrompt stored on the post
+ * @param {number} [seed] optional seed for a fresh variation
+ */
+export function buildPostImageUrl(prompt, seed) {
+  if (!prompt) return "";
+  const decorated = encodeURIComponent(prompt + IMAGE_STYLE_SUFFIX);
+  const seedParam = seed != null ? `&seed=${seed}` : "";
+  return `https://image.pollinations.ai/prompt/${decorated}?width=1080&height=1080&nologo=true${seedParam}`;
+}
+
 /**
  * Downloads an image from a URL, drawing it to canvas first to strip metadata (EXIF, location, camera details, etc.)
  * @param {string} imageUrl 

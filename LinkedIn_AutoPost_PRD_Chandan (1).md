@@ -80,7 +80,7 @@ LinkedIn's Nexus algorithm introduced "Depth Score" as the primary ranking metri
 ## 4. Core Features
 
 ### 4.1 AI Post Generator
-- Uses Claude API (claude-sonnet-4-6) to generate posts
+- Uses Gemini API (gemini-2.5-flash) to generate posts
 - Post types rotate daily: Technical tip · Project story · Career journey · Industry insight · Web3/Blockchain take · Behind-the-scenes dev life
 - Generates: post caption + hashtags + image prompt (for visual context)
 - Personalized to Chandan's tech stack and achievements (15,000+ users, 60% API gains, etc.)
@@ -122,14 +122,14 @@ LinkedIn's Nexus algorithm introduced "Depth Score" as the primary ranking metri
   - **Hacker News RSS** — top 10 stories filtered for dev relevance
   - **npm weekly downloads** — newly trending packages
   - **dev.to API** (`/api/articles?tag=react&tag=nodejs`) — top articles
-- Claude reads the news + Chandan's stack → decides if topic is relevant (React, Next.js, Node, Web3, blockchain, DevOps)
+- Gemini reads the news + Chandan's stack → decides if topic is relevant (React, Next.js, Node, Web3, blockchain, DevOps)
 - **Breaking News Mode**: when a high-relevance event is detected, it overrides the regular daily rotation and generates a trending post instead (e.g. "Cloudflare outage", "React 20 released", "npm critical vulnerability")
 - **Urgency Reminder**: sends a push notification + email — *"Trending topic detected! Post in next 2 hrs for max reach"*
 - **Relevance filter settings**: user can toggle which topics they want tracked (React / Node / Web3 / DevOps / npm / general tech)
 - Each trending post is tagged `[Trending]` in the history feed so user can track what worked
 
 ### 4.7 Auto PDF Carousel Generator *(Research-backed — highest ROI feature)*
-- For structured posts (e.g. "5 React Patterns", "My journey from intern to 15k users"), Claude generates content AND automatically builds a multi-slide PDF carousel using canvas/html2pdf
+- For structured posts (e.g. "5 React Patterns", "My journey from intern to 15k users"), Gemini generates content AND automatically builds a multi-slide PDF carousel using canvas/html2pdf
 - Slide specs: 1080×1350px vertical (LinkedIn optimal), branded with Chandan's name + handle
 - Each slide: 1 idea, 25–50 words max, clean typography, code snippet where relevant
 - User downloads 1 PDF → uploads to LinkedIn as a "document post"
@@ -147,7 +147,7 @@ LinkedIn's Nexus algorithm introduced "Depth Score" as the primary ranking metri
 - Why it matters: Author replies within 30 mins = **64% more comments and 2.3x more views** (LinkedIn data 2025)
 
 ### 4.9 AI Humanizer Layer *(Anti-AI-detection)*
-- After Claude generates the raw post, a mandatory second AI pass "humanizes" it before showing to Chandan
+- After Gemini generates the raw post, a mandatory second AI pass "humanizes" it before showing to Chandan
 - Humanizer prompt injects:
   - Chandan's specific projects by name (BlockseBlock, SipnPlay, LearnBlockseBlock)
   - Personal metrics he owns (15,000 users, 60% API latency reduction, 10,000+ competition participants)
@@ -174,7 +174,7 @@ LinkedIn's Nexus algorithm introduced "Depth Score" as the primary ranking metri
 ### 4.12 Evergreen Post Recycler *(Compound growth)*
 - App tracks engagement score for every post (likes + comments + shares)
 - Every 90 days, surfaces top 3 performing posts with suggestion: *"This post from March got 400 reactions — 60% of your current followers haven't seen it. Repost with a small update?"*
-- Claude generates a refreshed version of the post with a new hook and updated context
+- Gemini generates a refreshed version of the post with a new hook and updated context
 - Tagged as `[Refreshed]` in history feed
 - Why it matters: LinkedIn's 2025+ algorithm actively resurfaces old high-performing posts to new audiences. Compounding old wins with zero new ideation effort
 
@@ -188,7 +188,7 @@ LinkedIn's Nexus algorithm introduced "Depth Score" as the primary ranking metri
 - Every Sunday, app compiles the week's top post into a newsletter edition:
   - Title: "This week in [Chandan's niche]: [topic summary]"
   - Body: expanded version of the best post + 2-3 additional insights + what's coming next week
-  - Claude writes it in newsletter format — longer, more detailed than a post
+  - Gemini writes it in newsletter format — longer, more detailed than a post
 - User publishes directly from app to LinkedIn Newsletter (via LinkedIn Article API or copy-paste)
 - Why it matters: LinkedIn newsletters bypass the feed algorithm entirely — delivered directly to subscribers' inbox + push notification. Average open rate is 25-35% vs 2% feed reach. When Chandan publishes his first issue, LinkedIn automatically invites ALL his connections to subscribe
 - Newsletter tagged separately in history feed with subscriber count tracking (manual input)
@@ -204,7 +204,7 @@ LinkedIn's Nexus algorithm introduced "Depth Score" as the primary ranking metri
 
 ### 4.16 Strategic Comment Generator *(Replaces dead engagement pods)*
 - Daily: app surfaces 3 posts from industry leaders and target companies in Chandan's niche (React, Next.js, Node, Web3)
-- Claude generates a thoughtful, non-generic comment for each — 2-3 sentences with a genuine insight or follow-up question
+- Gemini generates a thoughtful, non-generic comment for each — 2-3 sentences with a genuine insight or follow-up question
 - Chandan reviews, edits if needed, copies and posts the comment on LinkedIn
 - Time: 10-15 minutes/day
 - Why it matters: Engagement pods are dead (shadowban risk). Strategic commenting on relevant posts gets Chandan's name in front of new audiences, drives profile visits, and grows followers organically. LinkedIn now shows comment impression counts — a good comment on a viral post = 10,000+ impressions
@@ -212,7 +212,7 @@ LinkedIn's Nexus algorithm introduced "Depth Score" as the primary ranking metri
 
 ### 4.17 LinkedIn Profile SEO Auditor *(One-time, passive discovery)*
 - One-time setup feature: Chandan inputs his current LinkedIn headline, About section text, and top 5 skills
-- Claude audits against 2026 recruiter search patterns for Full Stack Developers in India:
+- Gemini audits against 2026 recruiter search patterns for Full Stack Developers in India:
   - Keywords recruiter searches: "React Developer", "Next.js", "Node.js", "Full Stack", "MERN", "TypeScript"
   - Headline optimization: suggests a 150+ char headline with role + skills + value proposition
   - About section: rewrites opening 300 chars (visible before "see more") for maximum impact
@@ -267,7 +267,7 @@ LinkedIn's Nexus algorithm introduced "Depth Score" as the primary ranking metri
 - **JWT** (auth)
 
 ### Integrations
-- **Claude API** (Anthropic) — post generation + news relevance filtering
+- **Gemini API** (Google) — post generation + news relevance filtering
 - **LinkedIn OAuth 2.0 API** — publishing
 - **EmailJS or Nodemailer + SMTP** — reminders
 - **GitHub Trending API** — trending repos (free, no key)
@@ -293,7 +293,7 @@ LinkedIn's Nexus algorithm introduced "Depth Score" as the primary ranking metri
    - Today's post card (content + hashtags + status)
    - Post history feed below
    - Skeleton loaders
-3. **Integrate Claude API**
+3. **Integrate Gemini API**
    - System prompt with Chandan's profile data
    - Topic rotation logic (7 categories, one per day-of-week)
    - Generate post on page load if today's post doesn't exist
@@ -354,7 +354,7 @@ LinkedIn's Nexus algorithm introduced "Depth Score" as the primary ranking metri
 
 #### Tasks:
 1. **Trending news scanner** — cron job fetches GitHub Trending, HN, dev.to, npm daily at 7 AM IST
-2. **Breaking news mode** — Claude filters relevance, overrides rotation if something big drops
+2. **Breaking news mode** — Gemini filters relevance, overrides rotation if something big drops
 3. **Urgency notification** — push + email when trending topic detected
 4. **Relevance filter settings page** — toggle topics: React / Node / Web3 / DevOps / npm
 5. **Post editor modal** — edit AI post before publishing, tone toggle (Technical / Story / Motivational)
@@ -371,9 +371,9 @@ LinkedIn's Nexus algorithm introduced "Depth Score" as the primary ranking metri
 **Goal: Implement all research-backed features that maximize actual LinkedIn reach**
 
 #### Tasks:
-1. **PDF Carousel auto-generator** — Claude writes content + canvas builds 1080×1350px slides → downloadable PDF
+1. **PDF Carousel auto-generator** — Gemini writes content + canvas builds 1080×1350px slides → downloadable PDF
 2. **Format rotation logic** — alternate text, carousel, and poll posts; avoid 20% consecutive-format penalty
-3. **AI Humanizer layer** — second Claude pass injects Chandan's voice, projects, personal quirks before displaying post
+3. **AI Humanizer layer** — second Gemini pass injects Chandan's voice, projects, personal quirks before displaying post
 4. **Depth Score optimizer** — post structure targets 1,500+ chars, cliff-hanger mid-post, thread-starter closing question, "Save this" CTA
 5. **Golden hour engagement assistant** — 90-min countdown timer post-publish + 3 reply templates + milestone alerts
 6. **Topic DNA tracker** — dashboard showing posts per topic in last 30 days + authority warnings
@@ -452,11 +452,11 @@ LinkedIn's Nexus algorithm introduced "Depth Score" as the primary ranking metri
 | Risk | Mitigation |
 |------|-----------|
 | LinkedIn API approval delay | Use Share URL method as MVP fallback |
-| Claude API cost | Cache generated posts, don't regenerate on refresh |
+| Gemini API cost | Cache generated posts, don't regenerate on refresh |
 | Email delivery issues | Use EmailJS (free tier, reliable) |
 | Token expiry | Store refresh token, auto-renew |
 | News APIs rate limits | All chosen APIs (HN, dev.to, GitHub, npm) are free and unlimited |
-| Irrelevant trending posts | Claude relevance filter + user can dismiss/skip trending suggestion |
+| Irrelevant trending posts | Gemini relevance filter + user can dismiss/skip trending suggestion |
 | Twitter/X API cost | X API now paid — implement only if user wants, use Share URL fallback |
 | AI detection penalty (−30% reach) | Humanizer layer (Feature 5.9) adds Chandan's personal voice before every post |
 | External link penalty (−60% reach) | App UI explicitly blocks inserting URLs in post body; links go in profile/comments manually |
@@ -475,7 +475,7 @@ LinkedIn's Nexus algorithm introduced "Depth Score" as the primary ranking metri
 ## 13. Immediate First Step
 
 Build **Phase 1** right now as an interactive artifact — LinkedIn-like feed with:
-- Claude API generating real posts for Chandan
+- Gemini API generating real posts for Chandan
 - Post history with storage
 - Post/Pending status buttons
 - Beautiful LinkedIn-inspired UI
@@ -488,7 +488,7 @@ Say **"Start Phase 1"** to begin building! 🚀
 
 | # | Feature | Phase |
 |---|---------|-------|
-| 4.1 | AI Post Generator (Claude API, topic rotation) | 1 |
+| 4.1 | AI Post Generator (Gemini API, topic rotation) | 1 |
 | 4.2 | LinkedIn-Style Feed UI | 1 |
 | 4.3 | Email Reminder System | 2 |
 | 4.4 | LinkedIn OAuth + One-Click Publish | 3 |

@@ -1,10 +1,20 @@
-import { Settings, TrendingUp, LogOut } from "lucide-react";
+import { Settings, TrendingUp, LogOut, Menu, BarChart3 } from "lucide-react";
 import PostedInLogo from "@/components/PostedInLogo/PostedInLogo";
 
-export default function TopNav({ user, onLogout, onOpenSettings, onToggleTrending, showTrending, onUpgradeClick }) {
+export default function TopNav({ user, onLogout, onOpenSettings, onToggleTrending, showTrending, onUpgradeClick, onOpenLeftDrawer, onOpenRightDrawer }) {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
+        {onOpenLeftDrawer && (
+          <button
+            onClick={onOpenLeftDrawer}
+            className="lg:hidden flex items-center justify-center text-gray-600 hover:bg-gray-100 p-1.5 rounded-lg transition -ml-1"
+            aria-label="Open profile menu"
+          >
+            <Menu size={20} />
+          </button>
+        )}
+
         <PostedInLogo size="md" />
 
         <div className="ml-auto flex items-center gap-2">
@@ -57,6 +67,15 @@ export default function TopNav({ user, onLogout, onOpenSettings, onToggleTrendin
             >
               <LogOut size={15} />
               <span className="hidden sm:inline">Logout</span>
+            </button>
+          )}
+          {onOpenRightDrawer && (
+            <button
+              onClick={onOpenRightDrawer}
+              className="lg:hidden flex items-center justify-center text-gray-600 hover:bg-gray-100 p-1.5 rounded-lg transition"
+              aria-label="Open stats panel"
+            >
+              <BarChart3 size={20} />
             </button>
           )}
         </div>

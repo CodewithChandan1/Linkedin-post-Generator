@@ -74,9 +74,11 @@ export async function POST(req) {
   }
 
   let topicOverride = null;
+  let recentHashtags = [];
   try {
     const body = await req.json();
     topicOverride = body?.topic ?? null;
+    if (Array.isArray(body?.recentHashtags)) recentHashtags = body.recentHashtags.slice(0, 30);
   } catch {
     // no body — use today's rotation
   }
@@ -88,9 +90,15 @@ export async function POST(req) {
   const ai = new GoogleGenAI({ apiKey });
 
   try {
-    const userMessage = isCustomPrompt
+    const baseMessage = isCustomPrompt
       ? `Write today's LinkedIn post about this specific topic/angle: "${topic}". Make it specific to ${userProfile.name}'s real experience and perspective.`
       : `Write today's LinkedIn post. Topic category: "${topic}". Example angle for inspiration (do not copy): "${today.example}". Make it specific to ${userProfile.name}'s real experience.`;
+
+    const hashtagNote = recentHashtags.length
+      ? `\n\nFor variety, generate fresh hashtags and AVOID reusing these recently-used ones: ${recentHashtags.join(", ")}. Pick a different mix of 4-6 specific, relevant hashtags.`
+      : "";
+
+    const userMessage = baseMessage + hashtagNote;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",

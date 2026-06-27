@@ -175,7 +175,7 @@ export default function CarouselGenerator({ post, profile, onClose }) {
                 className="grid grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-1"
               >
                 {slides.map((slide, i) => (
-                  <SlidePreview key={i} slide={slide} index={i} total={slides.length} />
+                  <SlidePreview key={i} slide={slide} index={i} total={slides.length} profileName={profile?.name} />
                 ))}
               </div>
 
@@ -250,44 +250,104 @@ export default function CarouselGenerator({ post, profile, onClose }) {
   );
 }
 
-function SlidePreview({ slide, index, total }) {
+// Gradient backgrounds per slide type (inline styles render reliably in html2canvas).
+const GRADIENTS = {
+  cover: "linear-gradient(145deg, #0A66C2 0%, #084d92 55%, #04294f 100%)",
+  cta: "linear-gradient(145deg, #1f2937 0%, #111827 60%, #0b1220 100%)",
+  body: "linear-gradient(160deg, #ffffff 0%, #f1f6fc 100%)",
+};
+
+function SlidePreview({ slide, index, total, profileName }) {
   const isCover = slide.isCover || index === 0;
   const isCTA = slide.isCTA;
+  const dark = isCover || isCTA;
+  const initials =
+    (profileName || "Developer").split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 
   return (
     <div
-      className={`carousel-slide rounded-lg overflow-hidden aspect-[4/5] flex flex-col justify-between p-3 ${
-        isCover
-          ? "bg-linkedin text-white"
-          : isCTA
-          ? "bg-gray-900 text-white"
-          : "bg-gray-50 border border-gray-200 text-gray-900"
-      }`}
-      style={{ minHeight: 160 }}
+      className="carousel-slide relative rounded-xl overflow-hidden aspect-[4/5] flex flex-col justify-between p-4"
+      style={{
+        minHeight: 160,
+        background: isCover ? GRADIENTS.cover : isCTA ? GRADIENTS.cta : GRADIENTS.body,
+        color: dark ? "#fff" : "#1D2226",
+        border: dark ? "none" : "1px solid #e5e7eb",
+      }}
     >
-      {/* Slide number */}
-      <div className={`text-[9px] font-medium ${isCover || isCTA ? "text-white/60" : "text-gray-400"}`}>
-        {isCover ? "COVER" : isCTA ? "FOLLOW" : `${slide.slideNumber}/${total - 2}`}
+      {/* Decorative shapes */}
+      <div
+        className="absolute rounded-full"
+        style={{
+          width: 130, height: 130, top: -45, right: -35,
+          background: dark ? "rgba(255,255,255,0.10)" : "rgba(10,102,194,0.08)",
+        }}
+      />
+      <div
+        className="absolute rounded-full"
+        style={{
+          width: 70, height: 70, bottom: 40, left: -25,
+          background: dark ? "rgba(255,255,255,0.06)" : "rgba(10,102,194,0.06)",
+        }}
+      />
+      {!dark && (
+        <div className="absolute left-0 top-0 h-full" style={{ width: 5, background: "#0A66C2" }} />
+      )}
+
+      {/* Top row: badge + slide counter */}
+      <div className="relative flex items-center justify-between z-10">
+        <span
+          className="text-[8px] font-bold tracking-wider px-2 py-0.5 rounded-full"
+          style={{
+            background: dark ? "rgba(255,255,255,0.18)" : "#0A66C2",
+            color: "#fff",
+          }}
+        >
+          {isCover ? "CAROUSEL" : isCTA ? "FOLLOW" : `${slide.slideNumber} / ${total - 2}`}
+        </span>
+        {slide.emoji && <span className="text-base leading-none">{slide.emoji}</span>}
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col justify-center py-1">
-        <p className="text-sm font-bold leading-tight mb-1">{slide.headline}</p>
-        <p className={`text-[11px] leading-relaxed ${isCover || isCTA ? "text-white/80" : "text-gray-600"}`}>
+      <div className="relative z-10 flex-1 flex flex-col justify-center py-2">
+        <p className={`font-extrabold leading-tight mb-1.5 ${isCover ? "text-base" : "text-sm"}`}>
+          {slide.headline}
+        </p>
+        {/* Accent underline */}
+        <div
+          className="mb-2 rounded-full"
+          style={{ width: 32, height: 3, background: dark ? "rgba(255,255,255,0.55)" : "#0A66C2" }}
+        />
+        <p
+          className="text-[10.5px] leading-relaxed"
+          style={{ color: dark ? "rgba(255,255,255,0.85)" : "#4b5563" }}
+        >
           {slide.body}
         </p>
         {slide.codeSnippet && (
-          <pre className={`text-[9px] mt-1.5 rounded px-1.5 py-1 font-mono leading-relaxed overflow-hidden ${
-            isCover ? "bg-white/20" : "bg-gray-900 text-green-400"
-          }`}>
+          <pre
+            className="text-[9px] mt-2 rounded-md px-2 py-1.5 font-mono leading-relaxed overflow-hidden"
+            style={{ background: "#0b1220", color: "#4ade80" }}
+          >
             {slide.codeSnippet.slice(0, 100)}
           </pre>
         )}
       </div>
 
-      {/* Branding */}
-      <div className={`text-[9px] ${isCover || isCTA ? "text-white/50" : "text-gray-400"}`}>
-        {profile.name}
+      {/* Branding footer */}
+      <div className="relative z-10 flex items-center gap-1.5">
+        <span
+          className="flex items-center justify-center rounded-full text-[7px] font-bold"
+          style={{
+            width: 16, height: 16,
+            background: dark ? "#fff" : "#0A66C2",
+            color: dark ? "#0A66C2" : "#fff",
+          }}
+        >
+          {initials}
+        </span>
+        <span className="text-[9px] font-medium" style={{ color: dark ? "rgba(255,255,255,0.7)" : "#6b7280" }}>
+          {profileName || "Developer"}
+        </span>
       </div>
     </div>
   );

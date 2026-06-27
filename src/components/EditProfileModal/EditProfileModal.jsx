@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Check, X, Plus } from "lucide-react";
+import { X, Plus } from "lucide-react";
+import Drawer from "@/components/Drawer/Drawer";
 
 export default function EditProfileModal({ open, onClose, profile, onSave }) {
   const [name, setName] = useState("");
@@ -25,8 +26,6 @@ export default function EditProfileModal({ open, onClose, profile, onSave }) {
       setAchievements(profile.achievements || []);
     }
   }, [profile, open]);
-
-  if (!open) return null;
 
   function handleAddStack() {
     if (newStackItem.trim() && !stack.includes(newStackItem.trim())) {
@@ -79,21 +78,35 @@ export default function EditProfileModal({ open, onClose, profile, onSave }) {
     }
   }
 
-  return (
-    <div
-      className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-30 flex items-start justify-center overflow-y-auto py-8 px-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-xl border border-slate-200 w-full max-w-lg shadow-2xl relative overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+  const footer = (
+    <div className="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50/50">
+      <button
+        onClick={onClose}
+        className="text-xs text-slate-600 px-4 py-2 rounded-full hover:bg-slate-100 font-medium"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h2 className="font-semibold text-slate-900 text-base">Edit Developer Profile</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">×</button>
-        </div>
+        Cancel
+      </button>
+      <button
+        onClick={handleSave}
+        disabled={loading}
+        className="text-xs text-white bg-linkedin hover:bg-linkedin-hover px-5 py-2 rounded-full font-semibold shadow transition-all duration-150 disabled:opacity-50"
+      >
+        {loading ? "Saving..." : "Save Profile"}
+      </button>
+    </div>
+  );
 
-        <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+  return (
+    <Drawer
+      open={open}
+      onClose={onClose}
+      side="left"
+      zClass="z-30"
+      title="Edit Developer Profile"
+      bodyClassName="px-6 py-5 space-y-4"
+      footer={footer}
+    >
+      <>
           {error && (
             <div className="p-3 bg-red-50 text-red-600 border border-red-100 rounded-lg text-xs">
               {error}
@@ -224,24 +237,7 @@ export default function EditProfileModal({ open, onClose, profile, onSave }) {
               {achievements.length === 0 && <span className="text-xs text-slate-400 italic">No achievements added yet</span>}
             </div>
           </div>
-        </div>
-
-        <div className="flex justify-end gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50/50">
-          <button
-            onClick={onClose}
-            className="text-xs text-slate-600 px-4 py-2 rounded-full hover:bg-slate-100 font-medium"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={loading}
-            className="text-xs text-white bg-linkedin hover:bg-linkedin-hover px-5 py-2 rounded-full font-semibold shadow transition-all duration-150 disabled:opacity-50"
-          >
-            {loading ? "Saving..." : "Save Profile"}
-          </button>
-        </div>
-      </div>
-    </div>
+      </>
+    </Drawer>
   );
 }

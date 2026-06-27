@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TOPIC_FILTERS } from "@/lib/settings";
 import { getBestTime, tierColor } from "@/lib/bestTime";
 import { Check, Bell, BellOff } from "lucide-react";
+import Drawer from "@/components/Drawer/Drawer";
 import {
   sendReminderEmail,
   emailConfigured,
@@ -59,8 +60,6 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
     }
   }
 
-  if (!open) return null;
-
   const bestTime = getBestTime();
 
   function update(patch) {
@@ -93,21 +92,31 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
     }
   }
 
-  return (
-    <div
-      className="fixed inset-0 bg-black/40 z-30 flex items-start justify-center overflow-y-auto py-8 px-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-xl border border-gray-200 w-full max-w-lg shadow-xl"
-        onClick={(e) => e.stopPropagation()}
+  const footer = (
+    <div className="flex justify-end gap-2 px-5 py-4 border-t border-gray-200">
+      <button onClick={onClose} className="text-sm text-gray-600 px-4 py-2 rounded-full hover:bg-gray-100">
+        Cancel
+      </button>
+      <button
+        onClick={handleSave}
+        className="text-sm text-white bg-linkedin hover:bg-linkedin-hover px-4 py-2 rounded-full font-medium"
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-          <h2 className="font-semibold text-gray-900">Reminder settings</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
-        </div>
+        Save settings
+      </button>
+    </div>
+  );
 
-        <div className="px-5 py-4 space-y-5">
+  return (
+    <Drawer
+      open={open}
+      onClose={onClose}
+      side="right"
+      zClass="z-30"
+      title="Reminder settings"
+      bodyClassName="px-5 py-4 space-y-5"
+      footer={footer}
+    >
+      <>
           {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
@@ -118,6 +127,29 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-linkedin/40"
               placeholder="you@example.com"
             />
+            {/* Email verification status badge */}
+            {user && (
+              user.isEmailVerified ? (
+                <div className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-700 font-medium">
+                  <span className="flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500 text-white shrink-0">
+                    <Check size={10} strokeWidth={3} />
+                  </span>
+                  Email verified
+                </div>
+              ) : (
+                <div className="mt-1.5 flex items-center gap-1.5 text-xs text-amber-600 font-medium">
+                  <span className="text-base leading-none">⚠️</span>
+                  Email not verified —{" "}
+                  <button
+                    type="button"
+                    className="underline hover:text-amber-700 font-bold"
+                    onClick={() => setVerifyStep("need_verify")}
+                  >
+                    Verify now
+                  </button>
+                </div>
+              )
+            )}
           </div>
 
           {/* Reminder time */}
@@ -292,21 +324,8 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
               <p className="text-xs text-red-500 mt-1">{emailStatus}</p>
             )}
           </div>
-        </div>
-
-        <div className="flex justify-end gap-2 px-5 py-4 border-t border-gray-200">
-          <button onClick={onClose} className="text-sm text-gray-600 px-4 py-2 rounded-full hover:bg-gray-100">
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            className="text-sm text-white bg-linkedin hover:bg-linkedin-hover px-4 py-2 rounded-full font-medium"
-          >
-            Save settings
-          </button>
-        </div>
-      </div>
-    </div>
+      </>
+    </Drawer>
   );
 }
 

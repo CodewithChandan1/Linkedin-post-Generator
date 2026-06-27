@@ -30,16 +30,19 @@ import StrategicCommentGenerator from "@/components/StrategicCommentGenerator/St
 import ProfileVisitorTracker from "@/components/ProfileVisitorTracker/ProfileVisitorTracker";
 import VideoScriptGenerator from "@/components/VideoScriptGenerator/VideoScriptGenerator";
 import TwitterThreadPanel from "@/components/TwitterThreadPanel/TwitterThreadPanel";
+import PresentationGenerator from "@/components/PresentationGenerator/PresentationGenerator";
 import UpgradeModal from "@/components/UpgradeModal/UpgradeModal";
+import Drawer from "@/components/Drawer/Drawer";
 import { loadPosts, savePosts, todayKey } from "@/lib/storage";
 import { loadSettings, saveSettings } from "@/lib/settings";
 import { useReminderScheduler } from "@/lib/useReminderScheduler";
 import { useLinkedIn } from "@/lib/useLinkedIn";
 import { getNextFormat, advanceRotation, computeDepthScore } from "@/lib/formatRotation";
+import { buildPostImageUrl } from "@/lib/imageUtils";
 import {
   Wrench, Search, Target, Trophy, Calendar, Newspaper,
   MessageSquare, Eye, Sparkles, FileText, Video,
-  RotateCcw, Check, PenTool,
+  RotateCcw, Check, PenTool, Presentation,
 } from "lucide-react";
 
 export default function Home() {
@@ -60,6 +63,8 @@ export default function Home() {
   const [goldenHourPost, setGoldenHourPost] = useState(null);
   const [showCarousel, setShowCarousel] = useState(false);
   const [carouselPost, setCarouselPost] = useState(null);
+  const [showPresentation, setShowPresentation] = useState(false);
+  const [presentationPost, setPresentationPost] = useState(null);
   const [showSEOAuditor, setShowSEOAuditor] = useState(false);
   const [showCommentSeeding, setShowCommentSeeding] = useState(false);
   const [seedPost, setSeedPost] = useState(null);
@@ -74,6 +79,8 @@ export default function Home() {
   const [showTwitterThread, setShowTwitterThread] = useState(false);
   const [twitterPost, setTwitterPost] = useState(null);
   const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
+  const [leftDrawerOpen, setLeftDrawerOpen] = useState(false);
+  const [rightDrawerOpen, setRightDrawerOpen] = useState(false);
 
   const [historyPage, setHistoryPage] = useState(1);
   const HISTORY_PAGE_SIZE = 10;
@@ -365,6 +372,21 @@ export default function Home() {
     showToast("Post deleted");
   }
 
+  // Regenerate ONLY the image (keeps the content) — new seed → fresh visual, no AI cost.
+  function handleRegenerateImage(post) {
+    const prompt = post.imagePrompt;
+    if (!prompt) {
+      showToast("No image prompt available for this post");
+      return;
+    }
+    const seed = Math.floor(Math.random() * 1_000_000);
+    const newUrl = buildPostImageUrl(prompt, seed);
+    setPosts((prev) =>
+      prev.map((p) => (p.id === post.id ? { ...p, imageUrl: newUrl } : p))
+    );
+    showToast("Generating a new image…");
+  }
+
   const generate = useCallback(
     async (replace = false, prompt = "") => {
       setLoading(true);
@@ -372,10 +394,15 @@ export default function Home() {
       try {
         const { format, followerCTA } = getNextFormat();
 
+        // Smart hashtags — feed recently-used tags so the model picks fresh ones.
+        const recentHashtags = [
+          ...new Set(posts.slice(0, 10).flatMap((p) => p.hashtags || [])),
+        ].slice(0, 30);
+
         const res = await fetch("/api/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ topic: prompt || undefined }),
+          body: JSON.stringify({ topic: prompt || undefined, recentHashtags }),
         });
         const data = await res.json();
         if (!res.ok) {
@@ -428,7 +455,7 @@ export default function Home() {
         setLoading(false);
       }
     },
-    [today]
+    [today, posts]
   );
 
   // auto-generate today's post if it doesn't exist yet
@@ -541,6 +568,52 @@ export default function Home() {
     return <AuthScreen onAuthSuccess={(u) => setUser(u)} />;
   }
 
+  const leftSidebarContent = (
+    <>
+      <ProfileSidebar
+        profile={user?.profile}
+        onEdit={() => { setEditProfileOpen(true); setLeftDrawerOpen(false); }}
+      />
+      <LinkedInConnect linkedin={linkedin} />
+      {/* Phase 5 & 6: Tools panel */}
+      <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-2">
+        <p className="text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1.5">
+          <Wrench size={13} /> Tools
+        </p>
+        {[
+          { icon: <Presentation size={13} />, label: "Presentation Generator", action: () => { setPresentationPost(todaysPost || null); setShowPresentation(true); } },
+          { icon: <Search size={13} />, label: "Profile SEO Auditor", action: () => setShowSEOAuditor(true) },
+          { icon: <Target size={13} />, label: "Opportunity Tracker", action: () => setShowOpportunityTracker(true) },
+          { icon: <Trophy size={13} />, label: "Growth Dashboard", action: () => setShowGrowthDashboard(true) },
+          { icon: <Calendar size={13} />, label: "Content Calendar", action: () => setShowContentCalendar(true) },
+          { icon: <Newspaper size={13} />, label: "Newsletter Generator", action: () => setShowNewsletter(true) },
+          { icon: <MessageSquare size={13} />, label: "Strategic Comments", action: () => setShowStrategicComments(true) },
+          { icon: <Eye size={13} />, label: "Profile Visitor Tracker", action: () => setShowProfileVisitor(true) },
+        ].map(({ icon, label, action }) => (
+          <button
+            key={label}
+            onClick={() => { action(); setLeftDrawerOpen(false); }}
+            className="w-full text-left text-xs text-gray-700 bg-gray-50 hover:bg-linkedin/10 hover:text-linkedin border border-gray-200 rounded-lg px-3 py-2 transition flex items-center gap-2"
+          >
+            {icon} {label}
+          </button>
+        ))}
+      </div>
+    </>
+  );
+
+  const rightSidebarContent = (
+    <>
+      <StatsSidebar
+        posts={posts}
+        settings={settings}
+        onOpenSettings={() => { setSettingsOpen(true); setRightDrawerOpen(false); }}
+      />
+      <TopicDNAPanel posts={posts} />
+      {user && <TrendingPanel onGenerateFromTrending={(data) => { handleTrendingPost(data); setRightDrawerOpen(false); }} />}
+    </>
+  );
+
   return (
     <div className="relative min-h-screen">
       <div>
@@ -551,44 +624,22 @@ export default function Home() {
           onToggleTrending={() => setShowTrending(!showTrending)}
           showTrending={showTrending}
           onUpgradeClick={() => setIsUpgradeOpen(true)}
+          onOpenLeftDrawer={() => setLeftDrawerOpen(true)}
+          onOpenRightDrawer={() => setRightDrawerOpen(true)}
         />
 
         <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* Left: profile */}
-          <div className="lg:col-span-3 order-2 lg:order-1">
+          {/* Left: profile (desktop only; mobile uses the drawer) */}
+          <div className="hidden lg:block lg:col-span-3 lg:order-1">
             <div className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto space-y-4 pb-4 scrollbar-hide"
               style={{ scrollbarWidth: "none" }}
             >
-              <ProfileSidebar profile={user?.profile} onEdit={() => setEditProfileOpen(true)} />
-              <LinkedInConnect linkedin={linkedin} />
-              {/* Phase 5 & 6: Tools panel */}
-              <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-2">
-                <p className="text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1.5">
-                  <Wrench size={13} /> Tools
-                </p>
-                {[
-                  { icon: <Search size={13} />, label: "Profile SEO Auditor", action: () => setShowSEOAuditor(true) },
-                  { icon: <Target size={13} />, label: "Opportunity Tracker", action: () => setShowOpportunityTracker(true) },
-                  { icon: <Trophy size={13} />, label: "Growth Dashboard", action: () => setShowGrowthDashboard(true) },
-                  { icon: <Calendar size={13} />, label: "Content Calendar", action: () => setShowContentCalendar(true) },
-                  { icon: <Newspaper size={13} />, label: "Newsletter Generator", action: () => setShowNewsletter(true) },
-                  { icon: <MessageSquare size={13} />, label: "Strategic Comments", action: () => setShowStrategicComments(true) },
-                  { icon: <Eye size={13} />, label: "Profile Visitor Tracker", action: () => setShowProfileVisitor(true) },
-                ].map(({ icon, label, action }) => (
-                  <button
-                    key={label}
-                    onClick={action}
-                    className="w-full text-left text-xs text-gray-700 bg-gray-50 hover:bg-linkedin/10 hover:text-linkedin border border-gray-200 rounded-lg px-3 py-2 transition flex items-center gap-2"
-                  >
-                    {icon} {label}
-                  </button>
-                ))}
-              </div>
+              {leftSidebarContent}
             </div>
           </div>
 
           {/* Center: feed or trending */}
-          <div className="lg:col-span-6 order-1 lg:order-2 space-y-4">
+          <div className="min-w-0 lg:col-span-6 order-1 lg:order-2 space-y-4">
             {showTrending ? (
               <TrendingPage
                 onGenerateFromTrending={(data) => {
@@ -657,7 +708,7 @@ export default function Home() {
 
                 {loading && !todaysPost && <PostSkeleton />}
 
-                {todaysPost && <PostCard post={todaysPost} profile={user?.profile} onPost={handlePost} onRegenerate={() => generate(true)} onEdit={setEditingPost} onDelete={handleDelete} isToday />}
+                {todaysPost && <PostCard post={todaysPost} profile={user?.profile} onPost={handlePost} onRegenerate={() => generate(true)} onRegenerateImage={handleRegenerateImage} onEdit={setEditingPost} onDelete={handleDelete} isToday />}
 
                 {/* Phase 5: Depth Score + Humanizer for today's pending post */}
                 {todaysPost && todaysPost.status !== "posted" && (
@@ -683,6 +734,12 @@ export default function Home() {
                         className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 transition"
                       >
                         <FileText size={12} /> Carousel
+                      </button>
+                      <button
+                        onClick={() => { setPresentationPost(todaysPost); setShowPresentation(true); }}
+                        className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border border-indigo-300 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition"
+                      >
+                        <Presentation size={12} /> Presentation
                       </button>
                       <button
                         onClick={() => { setSeedPost(todaysPost); setShowCommentSeeding(true); }}
@@ -753,7 +810,7 @@ export default function Home() {
                     <h2 className="text-sm font-semibold text-gray-500 mb-3">Post history</h2>
                     <div className="space-y-4">
                       {history.map((p) => (
-                        <PostCard key={p.id} post={p} profile={user?.profile} onPost={handlePost} onEdit={setEditingPost} onDelete={handleDelete} />
+                        <PostCard key={p.id} post={p} profile={user?.profile} onPost={handlePost} onRegenerateImage={handleRegenerateImage} onEdit={setEditingPost} onDelete={handleDelete} />
                       ))}
                     </div>
                   </div>
@@ -762,17 +819,42 @@ export default function Home() {
             )}
           </div>
 
-          {/* Right: stats */}
-          <div className="lg:col-span-3 order-3">
+          {/* Right: stats (desktop only; mobile uses the drawer) */}
+          <div className="hidden lg:block lg:col-span-3 lg:order-3">
             <div className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto space-y-4 pb-4"
               style={{ scrollbarWidth: "none" }}
             >
-              <StatsSidebar posts={posts} settings={settings} onOpenSettings={() => setSettingsOpen(true)} />
-              <TopicDNAPanel posts={posts} />
-              {user && <TrendingPanel onGenerateFromTrending={handleTrendingPost} />}
+              {rightSidebarContent}
             </div>
           </div>
         </main>
+
+        {/* Mobile drawers */}
+        <Drawer
+          open={leftDrawerOpen}
+          onClose={() => setLeftDrawerOpen(false)}
+          side="left"
+          title="Profile & Tools"
+          mobileOnly
+          widthClass="w-[85%] max-w-sm"
+          panelClassName="bg-[#f3f2ef]"
+          bodyClassName="p-4 space-y-4"
+        >
+          {leftSidebarContent}
+        </Drawer>
+
+        <Drawer
+          open={rightDrawerOpen}
+          onClose={() => setRightDrawerOpen(false)}
+          side="right"
+          title="Stats & Trending"
+          mobileOnly
+          widthClass="w-[85%] max-w-sm"
+          panelClassName="bg-[#f3f2ef]"
+          bodyClassName="p-4 space-y-4"
+        >
+          {rightSidebarContent}
+        </Drawer>
 
         <SettingsModal
           open={settingsOpen}
@@ -813,6 +895,13 @@ export default function Home() {
             post={carouselPost}
             profile={user?.profile}
             onClose={() => { setShowCarousel(false); setCarouselPost(null); }}
+          />
+        )}
+        {showPresentation && (
+          <PresentationGenerator
+            post={presentationPost}
+            profile={user?.profile}
+            onClose={() => { setShowPresentation(false); setPresentationPost(null); }}
           />
         )}
         {showSEOAuditor && (

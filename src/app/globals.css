@@ -25,3 +25,12 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Prevent stray horizontal overflow on mobile/tablet.
+   Scoped below the lg breakpoint so desktop sticky sidebars stay intact. */
+@media (max-width: 1023px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+}
