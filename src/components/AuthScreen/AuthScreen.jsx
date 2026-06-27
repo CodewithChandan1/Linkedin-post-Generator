@@ -50,6 +50,8 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
       document.body.appendChild(script);
     }
 
+    let observer;
+
     const initGoogle = () => {
       if (window.google && window.google.accounts && window.google.accounts.id) {
         window.google.accounts.id.initialize({
@@ -59,24 +61,22 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
 
         const googleBtn = document.getElementById("google-signin-btn");
         if (googleBtn) {
-          let buttonWidth = 360;
-          if (typeof window !== "undefined") {
-            const screenWidth = window.innerWidth;
-            if (screenWidth < 360) {
-              buttonWidth = 240;
-            } else if (screenWidth < 480) {
-              buttonWidth = 280;
-            } else if (screenWidth < 768) {
-              buttonWidth = 320;
+          // Setup ResizeObserver to render the button at EXACTLY the parent's width
+          observer = new ResizeObserver((entries) => {
+            for (let entry of entries) {
+              const width = Math.floor(entry.contentRect.width);
+              if (entry.target && width >= 200) {
+                window.google.accounts.id.renderButton(googleBtn, {
+                  theme: "outline",
+                  size: "large",
+                  width: Math.min(width, 400),
+                  text: "signin_with",
+                  shape: "rectangular",
+                });
+              }
             }
-          }
-          window.google.accounts.id.renderButton(googleBtn, {
-            theme: "outline",
-            size: "large",
-            width: buttonWidth,
-            text: "signin_with",
-            shape: "rectangular",
           });
+          observer.observe(googleBtn);
         }
       }
     };
@@ -90,8 +90,15 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
           clearInterval(checkScript);
         }
       }, 100);
-      return () => clearInterval(checkScript);
+      return () => {
+        clearInterval(checkScript);
+        if (observer) observer.disconnect();
+      };
     }
+
+    return () => {
+      if (observer) observer.disconnect();
+    };
   }, [mode]);
 
   async function handleSubmit(e) {
@@ -612,7 +619,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
           </div>
 
           {/* Marquee track */}
-          <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent_0%,black_10%,black_90%,transparent_100%)]">
+          <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent_0%,black_5%,black_95%,transparent_100%)]">
             <div className="flex gap-3 animate-marquee-reviews w-max">
               {[
                 { initials: "RV", name: "Rahul Verma", role: "SDE @ Flipkart", color: "from-violet-500 to-purple-600", quote: "LinkedIn reach tripled in 3 weeks. Insanely good post quality." },
@@ -627,7 +634,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
                 { initials: "NK", name: "Neha Kapoor", role: "Dev Advocate", color: "from-blue-500 to-cyan-500", quote: "The AI understands tech content. My posts actually perform now." },
                 { initials: "MS", name: "Mohit Singh", role: "CTO @ Stackify", color: "from-rose-500 to-pink-600", quote: "Saved 2+ hours a week. Worth every rupee." },
               ].map((r, idx) => (
-                <div key={idx} className="flex items-start gap-2.5 bg-white/80 border border-slate-100 rounded-xl px-3.5 py-2.5 backdrop-blur-sm shrink-0 w-[220px]">
+                <div key={idx} className="flex items-start gap-2.5 bg-white/80 border border-slate-100 rounded-xl px-3.5 py-2.5 backdrop-blur-sm shrink-0 w-[260px]">
                   <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${r.color} flex items-center justify-center text-white font-bold text-[9px] shrink-0`}>
                     {r.initials}
                   </div>
@@ -636,7 +643,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
                       <span className="text-[10px] font-bold text-slate-800 truncate">{r.name}</span>
                     </div>
                     <div className="text-[9px] text-slate-400 mb-1 truncate">{r.role}</div>
-                    <p className="text-[10px] text-slate-600 leading-relaxed italic line-clamp-2">&ldquo;{r.quote}&rdquo;</p>
+                    <p className="text-[10px] text-slate-600 leading-relaxed italic line-clamp-3">&ldquo;{r.quote}&rdquo;</p>
                   </div>
                 </div>
               ))}
@@ -695,7 +702,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">What our users say</span>
               </div>
               {/* Marquee track */}
-              <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent_0%,black_10%,black_90%,transparent_100%)]">
+              <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent_0%,black_5%,black_95%,transparent_100%)]">
                 <div className="flex gap-3 animate-marquee-reviews w-max pb-1">
                   {[
                     { initials: "RV", name: "Rahul Verma", role: "SDE @ Flipkart", color: "from-violet-500 to-purple-600", quote: "LinkedIn reach tripled in 3 weeks. Insanely good quality." },
@@ -710,14 +717,14 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
                     { initials: "NK", name: "Neha Kapoor", role: "Dev Advocate", color: "from-blue-500 to-cyan-500", quote: "AI understands tech. My posts actually perform now." },
                     { initials: "MS", name: "Mohit Singh", role: "CTO @ Stackify", color: "from-rose-500 to-pink-600", quote: "Saved 2+ hours a week. Worth every rupee." },
                   ].map((r, idx) => (
-                    <div key={idx} className="flex items-start gap-2.5 bg-white border border-slate-200/80 rounded-xl px-3.5 py-3 shrink-0 w-[200px] shadow-sm">
+                    <div key={idx} className="flex items-start gap-2.5 bg-white border border-slate-200/80 rounded-xl px-3.5 py-3 shrink-0 w-[260px] shadow-sm">
                       <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${r.color} flex items-center justify-center text-white font-bold text-[9px] shrink-0`}>
                         {r.initials}
                       </div>
                       <div className="min-w-0">
                         <span className="text-[10px] font-bold text-slate-800 block truncate">{r.name}</span>
                         <span className="text-[9px] text-slate-400 block truncate mb-1">{r.role}</span>
-                        <p className="text-[10px] text-slate-600 leading-relaxed italic line-clamp-2">&ldquo;{r.quote}&rdquo;</p>
+                        <p className="text-[10px] text-slate-600 leading-relaxed italic line-clamp-3">&ldquo;{r.quote}&rdquo;</p>
                       </div>
                     </div>
                   ))}
