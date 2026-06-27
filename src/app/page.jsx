@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import Image from "next/image";
 import TopNav from "@/components/TopNav/TopNav";
 import ProfileSidebar from "@/components/ProfileSidebar/ProfileSidebar";
 import StatsSidebar from "@/components/StatsSidebar/StatsSidebar";
@@ -940,23 +941,21 @@ function LoadingScreen() {
       {/* Elegant minimalist loader container (no card borders/backgrounds) */}
       <div className="text-center space-y-8 z-10 max-w-sm w-full px-4">
         
-        {/* Animated Brand Logo Icon */}
+        {/* Animated Brand Logo */}
         <div className="flex justify-center">
           <div className="relative">
-            {/* Glowing background blur */}
             <div className="absolute inset-0 rounded-3xl bg-[#0A66C2]/10 blur-xl pointer-events-none scale-125" />
-            {/* Elegant outer frame */}
-            <div className="relative p-5 bg-white border border-slate-100 text-[#0A66C2] rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.03)] animate-bounce duration-[1500ms]">
-              <PenTool size={36} className="stroke-[2.5]" />
+            <div className="relative p-4 bg-white border border-slate-100 rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.03)] animate-bounce duration-[1500ms]">
+              <Image src="/favicon.png" alt="PostedIn" width={48} height={48} className="w-12 h-12 object-contain" />
             </div>
           </div>
         </div>
 
         {/* Brand Text & Cycling Status */}
         <div className="space-y-2.5">
-          <h1 className="text-2xl font-black tracking-tight text-slate-800">
-            Posted<span className="text-[#0A66C2]">In</span>
-          </h1>
+          <div className="flex justify-center">
+            <Image src="/logo.png" alt="PostedIn" width={130} height={34} className="h-8 w-auto object-contain" />
+          </div>
           <div className="h-6 flex items-center justify-center">
             <p key={loadMsgIndex} className="text-xs text-slate-400 font-bold uppercase tracking-wider animate-fade-in-up">
               {messages[loadMsgIndex]}

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Lock, Mail, User, Eye, EyeOff, PenTool, Key, CheckCircle, AlertCircle, Sparkles, TrendingUp } from "lucide-react";
+import Image from "next/image";
+import { Lock, Mail, User, Eye, EyeOff, Key, CheckCircle, AlertCircle, Sparkles } from "lucide-react";
 
 export default function AuthScreen({ onAuthSuccess, isModal = false }) {
   const [mode, setMode] = useState("login"); // "login" | "signup" | "forgot" | "reset"
@@ -512,13 +513,8 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
       <div className="hidden md:flex md:w-1/2 lg:w-3/5 relative overflow-hidden flex-col justify-between p-12 lg:p-16 border-r border-slate-200 z-10">
 
         {/* Brand header */}
-        <div className="flex items-center gap-3 z-10">
-          <div className="p-2.5 bg-white text-[#0A66C2] rounded-xl border border-slate-200 shadow-md">
-            <PenTool size={22} className="stroke-[2.5]" />
-          </div>
-          <span className="font-extrabold text-xl tracking-tight text-[#1d2226]">
-            PostedIn
-          </span>
+        <div className="flex items-center gap-2 z-10">
+          <Image src="/logo.png" alt="PostedIn" width={140} height={36} className="h-9 w-auto object-contain" priority />
         </div>
 
         {/* Hero copy and mockup card */}
@@ -643,13 +639,8 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
         <div className="w-full max-w-md mx-auto space-y-6">
           <div className="space-y-2">
             {/* Logo for mobile devices */}
-            <div className="flex md:hidden items-center gap-2 mb-6">
-              <div className="p-2 bg-white text-[#0A66C2] rounded-lg border border-slate-200 shadow-md">
-                <PenTool size={16} className="stroke-[2.5]" />
-              </div>
-              <span className="font-extrabold text-base tracking-tight text-slate-800">
-                PostedIn
-              </span>
+            <div className="flex md:hidden items-center mb-6">
+              <Image src="/logo.png" alt="PostedIn" width={130} height={34} className="h-8 w-auto object-contain" priority />
             </div>
 
             <h2 className="text-3xl font-black tracking-tight text-slate-800">
