@@ -1,5 +1,6 @@
 import { getSessionUser } from "@/lib/auth";
 import { sendReminderMail, mailerConfigured } from "@/lib/mailer";
+import { emitNotification } from "@/lib/notificationEmitter";
 
 export const runtime = "nodejs";
 
@@ -33,6 +34,14 @@ export async function POST(req) {
   try {
     await sendReminderMail({ toEmail, name: user.profile?.name, postPreview });
 
+    // Push real-time SSE notification to the user's browser tab
+    emitNotification(user._id.toString(), {
+      type: "success",
+      title: "Reminder email sent! 📧",
+      message: `Delivered to ${toEmail}. Check your inbox!`,
+      icon: "📧",
+    });
+
     // Increment email counter in settings database
     try {
       const { connectDB } = await import("@/lib/db");
@@ -49,6 +58,14 @@ export async function POST(req) {
 
     return Response.json({ success: true, to: toEmail });
   } catch (err) {
+    // Push failure notification too
+    emitNotification(user._id.toString(), {
+      type: "warning",
+      title: "Email delivery failed ⚠️",
+      message: err.message || "SMTP error. Check your credentials.",
+      icon: "⚠️",
+    });
     return Response.json({ error: err.message }, { status: 502 });
   }
 }
+

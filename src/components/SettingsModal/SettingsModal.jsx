@@ -3,6 +3,7 @@ import { TOPIC_FILTERS } from "@/lib/settings";
 import { getBestTime, tierColor } from "@/lib/bestTime";
 import { Check, Bell, BellOff, Mail } from "lucide-react";
 import Drawer from "@/components/Drawer/Drawer";
+import { pushNotification } from "@/components/NotificationBell/NotificationBell";
 import {
   requestNotificationPermission,
   notificationPermission,
@@ -93,8 +94,21 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to send email");
       setEmailStatus("sent");
+      // Real-time in-app notification
+      pushNotification({
+        type: "success",
+        title: "Reminder email sent! ✉️",
+        message: `Test email delivered to ${draft.email}. Check your inbox!`,
+        icon: "📧",
+      });
     } catch (e) {
       setEmailStatus(e.message || "failed");
+      pushNotification({
+        type: "warning",
+        title: "Email failed ⚠️",
+        message: e.message || "Could not send reminder email. Check your SMTP settings.",
+        icon: "⚠️",
+      });
     }
   }
 

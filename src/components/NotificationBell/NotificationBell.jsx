@@ -73,6 +73,32 @@ export default function NotificationBell() {
     setNotifs(loadNotifs());
   }
 
+  // ── SSE subscription for real-time server-pushed notifications ──────────────
+  useEffect(() => {
+    let es;
+    try {
+      es = new EventSource("/api/notifications/stream");
+
+      es.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          if (!payload?.title) return; // ignore heartbeat/ping frames
+          // Merge into localStorage store
+          const existing = loadNotifs();
+          existing.unshift({ ...payload, read: false });
+          saveNotifs(existing);
+          setNotifs(loadNotifs());
+        } catch { /* ignore malformed frames */ }
+      };
+
+      es.onerror = () => {
+        // Browser will auto-reconnect; nothing to do here
+      };
+    } catch { /* SSE not supported */ }
+
+    return () => { if (es) es.close(); };
+  }, []);
+
   useEffect(() => {
     refresh();
     window.addEventListener("postedin:notification", refresh);
