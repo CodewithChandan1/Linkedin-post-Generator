@@ -1,11 +1,11 @@
-import Image from "next/image";
 import { Settings, TrendingUp, LogOut } from "lucide-react";
+import PostedInLogo from "@/components/PostedInLogo/PostedInLogo";
 
 export default function TopNav({ user, onLogout, onOpenSettings, onToggleTrending, showTrending, onUpgradeClick }) {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
-        <Image src="/logo.png" alt="PostedIn" width={120} height={32} className="h-8 w-auto object-contain" priority />
+        <PostedInLogo size="md" />
 
         <div className="ml-auto flex items-center gap-2">
           {user && (

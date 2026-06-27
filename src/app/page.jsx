@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import Image from "next/image";
+import PostedInLogo from "@/components/PostedInLogo/PostedInLogo";
 import TopNav from "@/components/TopNav/TopNav";
 import ProfileSidebar from "@/components/ProfileSidebar/ProfileSidebar";
 import StatsSidebar from "@/components/StatsSidebar/StatsSidebar";
@@ -943,19 +943,16 @@ function LoadingScreen() {
         
         {/* Animated Brand Logo */}
         <div className="flex justify-center">
-          <div className="relative">
-            <div className="absolute inset-0 rounded-3xl bg-[#0A66C2]/10 blur-xl pointer-events-none scale-125" />
-            <div className="relative p-4 bg-white border border-slate-100 rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.03)] animate-bounce duration-[1500ms]">
-              <Image src="/favicon.png" alt="PostedIn" width={48} height={48} className="w-12 h-12 object-contain" />
+          <div className="relative animate-bounce duration-[1500ms]">
+            <div className="absolute inset-0 bg-[#0A66C2]/10 blur-xl rounded-3xl scale-125 pointer-events-none" />
+            <div className="relative p-4 bg-white border border-slate-100 rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+              <PostedInLogo size="lg" />
             </div>
           </div>
         </div>
 
-        {/* Brand Text & Cycling Status */}
-        <div className="space-y-2.5">
-          <div className="flex justify-center">
-            <Image src="/logo.png" alt="PostedIn" width={130} height={34} className="h-8 w-auto object-contain" />
-          </div>
+        {/* Cycling Status */}
+        <div className="space-y-2">
           <div className="h-6 flex items-center justify-center">
             <p key={loadMsgIndex} className="text-xs text-slate-400 font-bold uppercase tracking-wider animate-fade-in-up">
               {messages[loadMsgIndex]}

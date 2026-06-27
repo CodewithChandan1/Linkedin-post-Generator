@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
+import PostedInLogo from "@/components/PostedInLogo/PostedInLogo";
 import { Lock, Mail, User, Eye, EyeOff, Key, CheckCircle, AlertCircle, Sparkles } from "lucide-react";
 
 export default function AuthScreen({ onAuthSuccess, isModal = false }) {
@@ -514,7 +514,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
 
         {/* Brand header */}
         <div className="flex items-center gap-2 z-10">
-          <Image src="/logo.png" alt="PostedIn" width={140} height={36} className="h-9 w-auto object-contain" priority />
+          <PostedInLogo size="md" />
         </div>
 
         {/* Hero copy and mockup card */}
@@ -640,7 +640,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
           <div className="space-y-2">
             {/* Logo for mobile devices */}
             <div className="flex md:hidden items-center mb-6">
-              <Image src="/logo.png" alt="PostedIn" width={130} height={34} className="h-8 w-auto object-contain" priority />
+              <PostedInLogo size="md" />
             </div>
 
             <h2 className="text-3xl font-black tracking-tight text-slate-800">
