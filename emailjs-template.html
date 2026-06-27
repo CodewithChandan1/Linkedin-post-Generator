@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LinkedIn Post Reminder</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:'Segoe UI',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f8;padding:32px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#0A66C2 0%,#0d7fe8 100%);padding:32px 40px;text-align:center;">
+              <div style="font-size:28px;margin-bottom:8px;">🚀</div>
+              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:-0.3px;">PostedIn</h1>
+              <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">Your daily LinkedIn post is ready to publish</p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:36px 40px;">
+              <p style="margin:0 0 8px;font-size:15px;color:#374151;">Hi <strong>{{to_name}}</strong>,</p>
+              <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+                Your LinkedIn post for <strong style="color:#111827;">{{post_date}}</strong> has been generated and is ready to publish.
+              </p>
+
+              <!-- Best time box -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                <tr>
+                  <td style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:16px 20px;">
+                    <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:0.8px;">⏰ Best Time to Post Today</p>
+                    <p style="margin:0;font-size:18px;font-weight:700;color:#1e40af;">{{best_time}}</p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Post preview -->
+              <p style="margin:0 0 8px;font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.8px;">📝 Post Preview</p>
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                <tr>
+                  <td style="background:#f9fafb;border-left:4px solid #0A66C2;border-radius:0 8px 8px 0;padding:16px 20px;">
+                    <p style="margin:0;font-size:14px;color:#374151;line-height:1.7;font-style:italic;">"{{post_preview}}"</p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA Button -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                <tr>
+                  <td align="center">
+                    <a href="{{app_link}}" style="display:inline-block;background:#0A66C2;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 40px;border-radius:50px;letter-spacing:0.2px;">
+                      Open App &amp; Post Now →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Motivational note -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px 20px;text-align:center;">
+                    <p style="margin:0;font-size:14px;color:#15803d;font-weight:600;">💪 Consistent posting = consistent opportunities. Keep going!</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 40px;text-align:center;">
+              <p style="margin:0;font-size:12px;color:#9ca3af;">
+                You're receiving this because you enabled daily reminders in PostedIn.<br/>
+                <a href="{{app_link}}" style="color:#0A66C2;text-decoration:none;">Manage settings</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

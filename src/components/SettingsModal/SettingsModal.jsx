@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { TOPIC_FILTERS } from "@/lib/settings";
 import { getBestTime, tierColor } from "@/lib/bestTime";
-import { Check, Bell, BellOff } from "lucide-react";
+import { Check, Bell, BellOff, Mail } from "lucide-react";
 import Drawer from "@/components/Drawer/Drawer";
 import {
-  sendReminderEmail,
-  emailConfigured,
   requestNotificationPermission,
   notificationPermission,
   notificationsSupported,
@@ -84,8 +82,16 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
   async function handleTestEmail() {
     setEmailStatus("sending");
     try {
-      await sendReminderEmail({ email: draft.email, post: todaysPost, bestTime });
-      await fetch("/api/settings/increment-emails", { method: "POST" }).catch(() => {});
+      const res = await fetch("/api/send-reminder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: draft.email,
+          postPreview: todaysPost?.content || "",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send email");
       setEmailStatus("sent");
     } catch (e) {
       setEmailStatus(e.message || "failed");
@@ -305,19 +311,20 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
           <div className="border-t border-gray-100 pt-4">
             <button
               onClick={handleTestEmail}
-              disabled={!emailConfigured() || emailStatus === "sending"}
-              className="text-sm text-linkedin border border-linkedin/40 px-3 py-1.5 rounded-full hover:bg-linkedin/10 disabled:opacity-40"
+              disabled={!draft.email || emailStatus === "sending"}
+              className="flex items-center gap-2 text-sm text-linkedin border border-linkedin/40 px-4 py-2 rounded-full hover:bg-linkedin/10 disabled:opacity-40 transition"
             >
+              <Mail size={14} />
               {emailStatus === "sending" ? "Sending…" : "Send test email"}
             </button>
-            {!emailConfigured() && (
+            {!draft.email && (
               <p className="text-xs text-gray-400 mt-1">
-                Add NEXT_PUBLIC_EMAILJS_* keys to .env.local to enable email.
+                Add your email address above to send a test reminder.
               </p>
             )}
             {emailStatus === "sent" && (
-              <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-                <Check size={12} /> Test email sent
+              <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
+                <Check size={12} /> Test email sent! Check your inbox.
               </p>
             )}
             {emailStatus && !["sending", "sent"].includes(emailStatus) && (
