@@ -503,14 +503,14 @@ export default function Home() {
       prev.map((p) =>
         p.id === postId
           ? {
-              ...p,
-              likes: metrics.likes || 0,
-              comments: metrics.comments || 0,
-              shares: metrics.shares || 0,
-              views: metrics.views || 0,
-              impressions: metrics.impressions || 0,
-              clicks: metrics.clicks || 0,
-            }
+            ...p,
+            likes: metrics.likes || 0,
+            comments: metrics.comments || 0,
+            shares: metrics.shares || 0,
+            views: metrics.views || 0,
+            impressions: metrics.impressions || 0,
+            clicks: metrics.clicks || 0,
+          }
           : p
       )
     );
@@ -554,335 +554,334 @@ export default function Home() {
   return (
     <div className="relative min-h-screen">
       <div>
-      <TopNav
-        user={user}
-        onLogout={handleLogout}
-        onOpenSettings={() => setSettingsOpen(true)}
-        onToggleTrending={() => setShowTrending(!showTrending)}
-        showTrending={showTrending}
-        onUpgradeClick={() => setIsUpgradeOpen(true)}
-      />
+        <TopNav
+          user={user}
+          onLogout={handleLogout}
+          onOpenSettings={() => setSettingsOpen(true)}
+          onToggleTrending={() => setShowTrending(!showTrending)}
+          showTrending={showTrending}
+          onUpgradeClick={() => setIsUpgradeOpen(true)}
+        />
 
-      <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Left: profile */}
-        <div className="lg:col-span-3 order-2 lg:order-1">
-          <div className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto space-y-4 pb-4 scrollbar-hide"
-            style={{ scrollbarWidth: "none" }}
-          >
-            <ProfileSidebar profile={user?.profile} onEdit={() => setEditProfileOpen(true)} />
-            <LinkedInConnect linkedin={linkedin} />
-            {/* Phase 5 & 6: Tools panel */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-2">
-              <p className="text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1.5">
-                <Wrench size={13} /> Tools
-              </p>
-              {[
-                { icon: <Search size={13} />, label: "Profile SEO Auditor", action: () => setShowSEOAuditor(true) },
-                { icon: <Target size={13} />, label: "Opportunity Tracker", action: () => setShowOpportunityTracker(true) },
-                { icon: <Trophy size={13} />, label: "Growth Dashboard", action: () => setShowGrowthDashboard(true) },
-                { icon: <Calendar size={13} />, label: "Content Calendar", action: () => setShowContentCalendar(true) },
-                { icon: <Newspaper size={13} />, label: "Newsletter Generator", action: () => setShowNewsletter(true) },
-                { icon: <MessageSquare size={13} />, label: "Strategic Comments", action: () => setShowStrategicComments(true) },
-                { icon: <Eye size={13} />, label: "Profile Visitor Tracker", action: () => setShowProfileVisitor(true) },
-              ].map(({ icon, label, action }) => (
-                <button
-                  key={label}
-                  onClick={action}
-                  className="w-full text-left text-xs text-gray-700 bg-gray-50 hover:bg-linkedin/10 hover:text-linkedin border border-gray-200 rounded-lg px-3 py-2 transition flex items-center gap-2"
-                >
-                  {icon} {label}
-                </button>
-              ))}
+        <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* Left: profile */}
+          <div className="lg:col-span-3 order-2 lg:order-1">
+            <div className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto space-y-4 pb-4 scrollbar-hide"
+              style={{ scrollbarWidth: "none" }}
+            >
+              <ProfileSidebar profile={user?.profile} onEdit={() => setEditProfileOpen(true)} />
+              <LinkedInConnect linkedin={linkedin} />
+              {/* Phase 5 & 6: Tools panel */}
+              <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-2">
+                <p className="text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1.5">
+                  <Wrench size={13} /> Tools
+                </p>
+                {[
+                  { icon: <Search size={13} />, label: "Profile SEO Auditor", action: () => setShowSEOAuditor(true) },
+                  { icon: <Target size={13} />, label: "Opportunity Tracker", action: () => setShowOpportunityTracker(true) },
+                  { icon: <Trophy size={13} />, label: "Growth Dashboard", action: () => setShowGrowthDashboard(true) },
+                  { icon: <Calendar size={13} />, label: "Content Calendar", action: () => setShowContentCalendar(true) },
+                  { icon: <Newspaper size={13} />, label: "Newsletter Generator", action: () => setShowNewsletter(true) },
+                  { icon: <MessageSquare size={13} />, label: "Strategic Comments", action: () => setShowStrategicComments(true) },
+                  { icon: <Eye size={13} />, label: "Profile Visitor Tracker", action: () => setShowProfileVisitor(true) },
+                ].map(({ icon, label, action }) => (
+                  <button
+                    key={label}
+                    onClick={action}
+                    className="w-full text-left text-xs text-gray-700 bg-gray-50 hover:bg-linkedin/10 hover:text-linkedin border border-gray-200 rounded-lg px-3 py-2 transition flex items-center gap-2"
+                  >
+                    {icon} {label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Center: feed or trending */}
-        <div className="lg:col-span-6 order-1 lg:order-2 space-y-4">
-          {showTrending ? (
-            <TrendingPage
-              onGenerateFromTrending={(data) => {
-                handleTrendingPost(data);
-                setShowTrending(false);
-              }}
-              onClose={() => setShowTrending(false)}
-            />
-          ) : (
-            <>
-              <div className="flex items-center justify-between">
-                <h1 className="text-lg font-semibold text-gray-900">Today's post</h1>
-                <button
-                  onClick={() => generate(false)}
-                  disabled={loading}
-                  className="flex items-center gap-1.5 text-sm text-white bg-linkedin hover:bg-linkedin-hover px-3 py-1.5 rounded-full transition font-medium disabled:opacity-50"
-                >
-                  + Generate New Post
-                </button>
-              </div>
-
-              {/* Custom prompt input */}
-              <div className="bg-white rounded-xl border border-gray-200 p-3">
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (customPrompt.trim()) {
-                      generate(false, customPrompt.trim());
-                      setCustomPrompt("");
-                    }
-                  }}
-                  className="flex gap-2"
-                >
-                  <input
-                    type="text"
-                    value={customPrompt}
-                    onChange={(e) => setCustomPrompt(e.target.value)}
-                    placeholder="Write a post about... (custom topic/prompt)"
-                    className="flex-1 border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-linkedin/30 focus:border-linkedin"
-                  />
-                  <button
-                    type="submit"
-                    disabled={loading || !customPrompt.trim()}
-                    className="shrink-0 bg-linkedin hover:bg-linkedin-hover text-white text-sm font-medium px-4 py-2 rounded-full disabled:opacity-50 transition"
-                  >
-                    Generate
-                  </button>
-                </form>
-                <p className="text-[11px] text-gray-400 mt-1.5 px-1">
-                  e.g. "my experience building this LinkedIn auto-post tool" or "React Server Components pros and cons"
-                </p>
-              </div>
-
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-4">
-                  <p className="font-medium">Couldn't generate a post</p>
-                  <p className="mt-1 text-red-600">{error}</p>
-                  <button
-                    onClick={() => generate(true)}
-                    className="mt-2 text-linkedin font-medium hover:underline"
-                  >
-                    Try again
-                  </button>
-                </div>
-              )}
-
-              {loading && !todaysPost && <PostSkeleton />}
-
-              {todaysPost && <PostCard post={todaysPost} profile={user?.profile} onPost={handlePost} onRegenerate={() => generate(true)} onEdit={setEditingPost} onDelete={handleDelete} isToday />}
-
-              {/* Phase 5: Depth Score + Humanizer for today's pending post */}
-              {todaysPost && todaysPost.status !== "posted" && (
-                <div className="space-y-2">
-                  <DepthScoreCard post={todaysPost} />
-                  <div className="flex gap-2 flex-wrap">
-                    <button
-                      onClick={() => handleHumanize(todaysPost)}
-                      disabled={humanizing || todaysPost.humanized}
-                      className={`flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border transition ${
-                        todaysPost.humanized
-                          ? "border-green-300 text-green-700 bg-green-50 cursor-default"
-                          : "border-purple-300 text-purple-700 bg-purple-50 hover:bg-purple-100"
-                      } disabled:opacity-60`}
-                    >
-                      {todaysPost.humanized
-                        ? <><Check size={12} /> Humanized</>
-                        : humanizing
-                        ? "Humanizing…"
-                        : <><Sparkles size={12} /> AI Humanize</>}
-                    </button>
-                    <button
-                      onClick={() => { setCarouselPost(todaysPost); setShowCarousel(true); }}
-                      className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 transition"
-                    >
-                      <FileText size={12} /> Carousel
-                    </button>
-                    <button
-                      onClick={() => { setSeedPost(todaysPost); setShowCommentSeeding(true); }}
-                      className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 transition"
-                    >
-                      <MessageSquare size={12} /> Seed Comments
-                    </button>
-                    <button
-                      onClick={() => { setVideoScriptPost(todaysPost); setShowVideoScript(true); }}
-                      className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border border-orange-300 text-orange-700 bg-orange-50 hover:bg-orange-100 transition"
-                    >
-                      <Video size={12} /> Video Script
-                    </button>
-                    <button
-                      onClick={() => { setTwitterPost(todaysPost); setShowTwitterThread(true); }}
-                      className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 transition"
-                    >
-                      <span className="font-bold text-[11px]">𝕏</span> Thread
-                    </button>
-                  </div>
-                  {todaysPost.humanized && todaysPost.humanizeChanges?.length > 0 && (
-                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-2.5 text-[11px] text-purple-800">
-                      <p className="font-semibold mb-1 flex items-center gap-1"><Sparkles size={11} /> Humanizer changes:</p>
-                      <ul className="space-y-0.5">
-                        {todaysPost.humanizeChanges.slice(0, 3).map((c, i) => (
-                          <li key={i}>• {c}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {todaysPost.format && todaysPost.format !== "text" && (
-                    <div className="text-[11px] text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5 flex items-center gap-1.5">
-                      <RotateCcw size={11} /> Format rotation: <strong>{todaysPost.format}</strong> post scheduled
-                      {todaysPost.format === "carousel" && " — use Carousel above"}
-                      {todaysPost.format === "poll" && " — create as a native LinkedIn poll for 8.9% engagement"}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Golden Hour Timer — shows after posting */}
-              {goldenHourPost && (
-                <GoldenHourTimer
-                  post={goldenHourPost}
-                  onDismiss={() => setGoldenHourPost(null)}
-                />
-              )}
-
-              {todaysPost && todaysPost.status !== "posted" && todaysPost.hooks?.length > 0 && (
-                <HooksPanel hooks={todaysPost.hooks} onSelectHook={(hook) => handleSelectHook(hook, todaysPost)} />
-              )}
-
-              {!loading && !todaysPost && !error && (
-                <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-                  <SparkleIcon className="w-8 h-8 text-linkedin mx-auto" />
-                  <p className="mt-2 text-gray-600 text-sm">No post yet for today.</p>
+          {/* Center: feed or trending */}
+          <div className="lg:col-span-6 order-1 lg:order-2 space-y-4">
+            {showTrending ? (
+              <TrendingPage
+                onGenerateFromTrending={(data) => {
+                  handleTrendingPost(data);
+                  setShowTrending(false);
+                }}
+                onClose={() => setShowTrending(false)}
+              />
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <h1 className="text-lg font-semibold text-gray-900">Today's post</h1>
                   <button
                     onClick={() => generate(false)}
-                    className="mt-3 bg-linkedin text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-linkedin-hover"
+                    disabled={loading}
+                    className="flex items-center gap-1.5 text-sm text-white bg-linkedin hover:bg-linkedin-hover px-3 py-1.5 rounded-full transition font-medium disabled:opacity-50"
                   >
-                    Generate today's post
+                    + Generate New Post
                   </button>
                 </div>
-              )}
 
-              {history.length > 0 && (
-                <div className="pt-2">
-                  <h2 className="text-sm font-semibold text-gray-500 mb-3">Post history</h2>
-                  <div className="space-y-4">
-                    {history.map((p) => (
-                      <PostCard key={p.id} post={p} profile={user?.profile} onPost={handlePost} onEdit={setEditingPost} onDelete={handleDelete} />
-                    ))}
-                  </div>
+                {/* Custom prompt input */}
+                <div className="bg-white rounded-xl border border-gray-200 p-3">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (customPrompt.trim()) {
+                        generate(false, customPrompt.trim());
+                        setCustomPrompt("");
+                      }
+                    }}
+                    className="flex gap-2"
+                  >
+                    <input
+                      type="text"
+                      value={customPrompt}
+                      onChange={(e) => setCustomPrompt(e.target.value)}
+                      placeholder="Write a post about... (custom topic/prompt)"
+                      className="flex-1 border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-linkedin/30 focus:border-linkedin"
+                    />
+                    <button
+                      type="submit"
+                      disabled={loading || !customPrompt.trim()}
+                      className="shrink-0 bg-linkedin hover:bg-linkedin-hover text-white text-sm font-medium px-4 py-2 rounded-full disabled:opacity-50 transition"
+                    >
+                      Generate
+                    </button>
+                  </form>
+                  <p className="text-[11px] text-gray-400 mt-1.5 px-1">
+                    e.g. "my experience building this LinkedIn auto-post tool" or "React Server Components pros and cons"
+                  </p>
                 </div>
-              )}
-            </>
-          )}
-        </div>
 
-        {/* Right: stats */}
-        <div className="lg:col-span-3 order-3">
-          <div className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto space-y-4 pb-4"
-            style={{ scrollbarWidth: "none" }}
-          >
-            <StatsSidebar posts={posts} settings={settings} onOpenSettings={() => setSettingsOpen(true)} />
-            <TopicDNAPanel posts={posts} />
-            {user && <TrendingPanel onGenerateFromTrending={handleTrendingPost} />}
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-4">
+                    <p className="font-medium">Couldn't generate a post</p>
+                    <p className="mt-1 text-red-600">{error}</p>
+                    <button
+                      onClick={() => generate(true)}
+                      className="mt-2 text-linkedin font-medium hover:underline"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                )}
+
+                {loading && !todaysPost && <PostSkeleton />}
+
+                {todaysPost && <PostCard post={todaysPost} profile={user?.profile} onPost={handlePost} onRegenerate={() => generate(true)} onEdit={setEditingPost} onDelete={handleDelete} isToday />}
+
+                {/* Phase 5: Depth Score + Humanizer for today's pending post */}
+                {todaysPost && todaysPost.status !== "posted" && (
+                  <div className="space-y-2">
+                    <DepthScoreCard post={todaysPost} />
+                    <div className="flex gap-2 flex-wrap">
+                      <button
+                        onClick={() => handleHumanize(todaysPost)}
+                        disabled={humanizing || todaysPost.humanized}
+                        className={`flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border transition ${todaysPost.humanized
+                            ? "border-green-300 text-green-700 bg-green-50 cursor-default"
+                            : "border-purple-300 text-purple-700 bg-purple-50 hover:bg-purple-100"
+                          } disabled:opacity-60`}
+                      >
+                        {todaysPost.humanized
+                          ? <><Check size={12} /> Humanized</>
+                          : humanizing
+                            ? "Humanizing…"
+                            : <><Sparkles size={12} /> AI Humanize</>}
+                      </button>
+                      <button
+                        onClick={() => { setCarouselPost(todaysPost); setShowCarousel(true); }}
+                        className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 transition"
+                      >
+                        <FileText size={12} /> Carousel
+                      </button>
+                      <button
+                        onClick={() => { setSeedPost(todaysPost); setShowCommentSeeding(true); }}
+                        className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 transition"
+                      >
+                        <MessageSquare size={12} /> Seed Comments
+                      </button>
+                      <button
+                        onClick={() => { setVideoScriptPost(todaysPost); setShowVideoScript(true); }}
+                        className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border border-orange-300 text-orange-700 bg-orange-50 hover:bg-orange-100 transition"
+                      >
+                        <Video size={12} /> Video Script
+                      </button>
+                      <button
+                        onClick={() => { setTwitterPost(todaysPost); setShowTwitterThread(true); }}
+                        className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-full border border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 transition"
+                      >
+                        <span className="font-bold text-[11px]">𝕏</span> Thread
+                      </button>
+                    </div>
+                    {todaysPost.humanized && todaysPost.humanizeChanges?.length > 0 && (
+                      <div className="bg-purple-50 border border-purple-200 rounded-lg p-2.5 text-[11px] text-purple-800">
+                        <p className="font-semibold mb-1 flex items-center gap-1"><Sparkles size={11} /> Humanizer changes:</p>
+                        <ul className="space-y-0.5">
+                          {todaysPost.humanizeChanges.slice(0, 3).map((c, i) => (
+                            <li key={i}>• {c}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {todaysPost.format && todaysPost.format !== "text" && (
+                      <div className="text-[11px] text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5 flex items-center gap-1.5">
+                        <RotateCcw size={11} /> Format rotation: <strong>{todaysPost.format}</strong> post scheduled
+                        {todaysPost.format === "carousel" && " — use Carousel above"}
+                        {todaysPost.format === "poll" && " — create as a native LinkedIn poll for 8.9% engagement"}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Golden Hour Timer — shows after posting */}
+                {goldenHourPost && (
+                  <GoldenHourTimer
+                    post={goldenHourPost}
+                    onDismiss={() => setGoldenHourPost(null)}
+                  />
+                )}
+
+                {todaysPost && todaysPost.status !== "posted" && todaysPost.hooks?.length > 0 && (
+                  <HooksPanel hooks={todaysPost.hooks} onSelectHook={(hook) => handleSelectHook(hook, todaysPost)} />
+                )}
+
+                {!loading && !todaysPost && !error && (
+                  <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+                    <SparkleIcon className="w-8 h-8 text-linkedin mx-auto" />
+                    <p className="mt-2 text-gray-600 text-sm">No post yet for today.</p>
+                    <button
+                      onClick={() => generate(false)}
+                      className="mt-3 bg-linkedin text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-linkedin-hover"
+                    >
+                      Generate today's post
+                    </button>
+                  </div>
+                )}
+
+                {history.length > 0 && (
+                  <div className="pt-2">
+                    <h2 className="text-sm font-semibold text-gray-500 mb-3">Post history</h2>
+                    <div className="space-y-4">
+                      {history.map((p) => (
+                        <PostCard key={p.id} post={p} profile={user?.profile} onPost={handlePost} onEdit={setEditingPost} onDelete={handleDelete} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        </div>
-      </main>
 
-      <SettingsModal
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        settings={settings || {}}
-        onSave={handleSaveSettings}
-        todaysPost={todaysPost}
-        user={user}
-        onUpdateUser={setUser}
-      />
+          {/* Right: stats */}
+          <div className="lg:col-span-3 order-3">
+            <div className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto space-y-4 pb-4"
+              style={{ scrollbarWidth: "none" }}
+            >
+              <StatsSidebar posts={posts} settings={settings} onOpenSettings={() => setSettingsOpen(true)} />
+              <TopicDNAPanel posts={posts} />
+              {user && <TrendingPanel onGenerateFromTrending={handleTrendingPost} />}
+            </div>
+          </div>
+        </main>
 
-      <EditPostModal
-        open={Boolean(editingPost)}
-        post={editingPost}
-        onSave={handleEditSave}
-        onClose={() => setEditingPost(null)}
-      />
+        <SettingsModal
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          settings={settings || {}}
+          onSave={handleSaveSettings}
+          todaysPost={todaysPost}
+          user={user}
+          onUpdateUser={setUser}
+        />
 
-      {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2.5 rounded-lg shadow-lg z-20">
-          {toast}
-        </div>
-      )}
+        <EditPostModal
+          open={Boolean(editingPost)}
+          post={editingPost}
+          onSave={handleEditSave}
+          onClose={() => setEditingPost(null)}
+        />
 
-      <EditProfileModal
-        open={editProfileOpen}
-        onClose={() => setEditProfileOpen(false)}
-        profile={user?.profile}
-        onSave={(updatedUser) => {
-          setUser(updatedUser);
-          showToast("Profile updated successfully!");
-        }}
-      />
+        {toast && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2.5 rounded-lg shadow-lg z-20">
+            {toast}
+          </div>
+        )}
 
-      {/* Phase 5 Modals */}
-      {showCarousel && (
-        <CarouselGenerator
-          post={carouselPost}
+        <EditProfileModal
+          open={editProfileOpen}
+          onClose={() => setEditProfileOpen(false)}
           profile={user?.profile}
-          onClose={() => { setShowCarousel(false); setCarouselPost(null); }}
+          onSave={(updatedUser) => {
+            setUser(updatedUser);
+            showToast("Profile updated successfully!");
+          }}
         />
-      )}
-      {showSEOAuditor && (
-        <SEOAuditor profile={user?.profile} onClose={() => setShowSEOAuditor(false)} />
-      )}
-      {showCommentSeeding && (
-        <CommentSeedingPanel
-          post={seedPost}
-          onClose={() => { setShowCommentSeeding(false); setSeedPost(null); }}
-        />
-      )}
-      {showOpportunityTracker && (
-        <OpportunityTracker onClose={() => setShowOpportunityTracker(false)} />
-      )}
 
-      {/* Phase 6 Modals */}
-      {showGrowthDashboard && (
-        <GrowthDashboard
-          posts={posts}
-          settings={settings}
-          onClose={() => setShowGrowthDashboard(false)}
-          onOpenNewsletterGenerator={() => setShowNewsletter(true)}
-          onOpenStrategicComments={() => setShowStrategicComments(true)}
-          onOpenProfileVisitor={() => setShowProfileVisitor(true)}
-          onOpenContentCalendar={() => setShowContentCalendar(true)}
-          onRefreshPost={handleRefreshPost}
-          onUpdatePostMetrics={handleUpdatePostMetrics}
-        />
-      )}
-      {showContentCalendar && (
-        <ContentCalendar
-          onClose={() => setShowContentCalendar(false)}
-          onGenerateForDay={(day) => generate(false, day.customPrompt || day.topic)}
-        />
-      )}
-      {showNewsletter && (
-        <NewsletterGenerator
-          posts={posts}
-          onClose={() => setShowNewsletter(false)}
-        />
-      )}
-      {showStrategicComments && (
-        <StrategicCommentGenerator onClose={() => setShowStrategicComments(false)} />
-      )}
-      {showProfileVisitor && (
-        <ProfileVisitorTracker onClose={() => setShowProfileVisitor(false)} />
-      )}
-      {showVideoScript && (
-        <VideoScriptGenerator
-          post={videoScriptPost}
-          onClose={() => { setShowVideoScript(false); setVideoScriptPost(null); }}
-        />
-      )}
-      {showTwitterThread && (
-        <TwitterThreadPanel
-          post={twitterPost}
-          onClose={() => { setShowTwitterThread(false); setTwitterPost(null); }}
-        />
-      )}
+        {/* Phase 5 Modals */}
+        {showCarousel && (
+          <CarouselGenerator
+            post={carouselPost}
+            profile={user?.profile}
+            onClose={() => { setShowCarousel(false); setCarouselPost(null); }}
+          />
+        )}
+        {showSEOAuditor && (
+          <SEOAuditor profile={user?.profile} onClose={() => setShowSEOAuditor(false)} />
+        )}
+        {showCommentSeeding && (
+          <CommentSeedingPanel
+            post={seedPost}
+            onClose={() => { setShowCommentSeeding(false); setSeedPost(null); }}
+          />
+        )}
+        {showOpportunityTracker && (
+          <OpportunityTracker onClose={() => setShowOpportunityTracker(false)} />
+        )}
+
+        {/* Phase 6 Modals */}
+        {showGrowthDashboard && (
+          <GrowthDashboard
+            posts={posts}
+            settings={settings}
+            onClose={() => setShowGrowthDashboard(false)}
+            onOpenNewsletterGenerator={() => setShowNewsletter(true)}
+            onOpenStrategicComments={() => setShowStrategicComments(true)}
+            onOpenProfileVisitor={() => setShowProfileVisitor(true)}
+            onOpenContentCalendar={() => setShowContentCalendar(true)}
+            onRefreshPost={handleRefreshPost}
+            onUpdatePostMetrics={handleUpdatePostMetrics}
+          />
+        )}
+        {showContentCalendar && (
+          <ContentCalendar
+            onClose={() => setShowContentCalendar(false)}
+            onGenerateForDay={(day) => generate(false, day.customPrompt || day.topic)}
+          />
+        )}
+        {showNewsletter && (
+          <NewsletterGenerator
+            posts={posts}
+            onClose={() => setShowNewsletter(false)}
+          />
+        )}
+        {showStrategicComments && (
+          <StrategicCommentGenerator onClose={() => setShowStrategicComments(false)} />
+        )}
+        {showProfileVisitor && (
+          <ProfileVisitorTracker onClose={() => setShowProfileVisitor(false)} />
+        )}
+        {showVideoScript && (
+          <VideoScriptGenerator
+            post={videoScriptPost}
+            onClose={() => { setShowVideoScript(false); setVideoScriptPost(null); }}
+          />
+        )}
+        {showTwitterThread && (
+          <TwitterThreadPanel
+            post={twitterPost}
+            onClose={() => { setShowTwitterThread(false); setTwitterPost(null); }}
+          />
+        )}
       </div>
 
       <UpgradeModal
@@ -920,7 +919,7 @@ function LoadingScreen() {
       <style>{`
         @keyframes loading-bar {
           0% { left: -100%; width: 50%; }
-          50% { left: 30%; width: 40%; }
+          50% { left: 20%; width: 40%; }
           100% { left: 100%; width: 50%; }
         }
         @keyframes fade-in-up {
@@ -928,7 +927,7 @@ function LoadingScreen() {
           to { opacity: 1; transform: translateY(0); }
         }
         .animate-loading-bar {
-          animation: loading-bar 2s ease-in-out infinite;
+          animation: loading-bar 1.8s ease-in-out infinite;
         }
         .animate-fade-in-up {
           animation: fade-in-up 0.3s ease-out forwards;
@@ -938,31 +937,42 @@ function LoadingScreen() {
       {/* BACKGROUND DECORATIVE GRID */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-60 pointer-events-none" />
 
-      {/* Main loading card */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-8 max-w-sm w-full text-center space-y-6 relative overflow-hidden shadow-xl z-10">
+      {/* Elegant minimalist loader container (no card borders/backgrounds) */}
+      <div className="text-center space-y-8 z-10 max-w-sm w-full px-4">
+        
+        {/* Animated Brand Logo Icon */}
         <div className="flex justify-center">
           <div className="relative">
-            {/* Glowing pulse ring */}
-            <div className="absolute inset-0 rounded-2xl bg-[#0A66C2]/10 animate-ping duration-1000" />
-            {/* Main icon container */}
-            <div className="relative p-4 bg-white border border-slate-200 text-[#0A66C2] rounded-2xl shadow-md animate-bounce">
+            {/* Glowing background blur */}
+            <div className="absolute inset-0 rounded-3xl bg-[#0A66C2]/10 blur-xl pointer-events-none scale-125" />
+            {/* Elegant outer frame */}
+            <div className="relative p-5 bg-white border border-slate-100 text-[#0A66C2] rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.03)] animate-bounce duration-[1500ms]">
               <PenTool size={36} className="stroke-[2.5]" />
             </div>
           </div>
         </div>
 
-        {/* Text Area */}
-        <div className="space-y-1.5 h-12 flex flex-col justify-center">
-          <h3 className="font-extrabold text-slate-800 text-base tracking-tight">DevPost AI</h3>
-          <p key={loadMsgIndex} className="text-xs text-slate-500 font-semibold animate-fade-in-up">
-            {messages[loadMsgIndex]}
-          </p>
+        {/* Brand Text & Cycling Status */}
+        <div className="space-y-2.5">
+          <h1 className="text-2xl font-black tracking-tight text-slate-800">
+            DevPost <span className="text-[#0A66C2]">AI</span>
+          </h1>
+          <div className="h-6 flex items-center justify-center">
+            <p key={loadMsgIndex} className="text-xs text-slate-400 font-bold uppercase tracking-wider animate-fade-in-up">
+              {messages[loadMsgIndex]}
+            </p>
+          </div>
         </div>
 
-        {/* Loading Progress Bar */}
-        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden relative">
-          <div className="absolute top-0 bottom-0 left-0 bg-[#0A66C2] rounded-full w-2/3 animate-loading-bar" />
+        {/* Ultra-sleek loader bar */}
+        <div className="w-48 mx-auto bg-slate-200/60 h-[3px] rounded-full overflow-hidden relative">
+          <div className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-[#0A66C2] to-blue-500 rounded-full w-1/2 animate-loading-bar" />
         </div>
+      </div>
+
+      {/* Small subtle branding footer */}
+      <div className="absolute bottom-8 left-0 right-0 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest pointer-events-none opacity-80">
+        LinkedIn Creator Suite
       </div>
     </div>
   );
