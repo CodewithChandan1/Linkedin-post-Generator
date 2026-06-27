@@ -15,6 +15,7 @@ export async function GET() {
       id: user._id,
       email: user.email,
       profile: user.profile,
+      isPremium: user.isPremium || false,
     },
   });
 }

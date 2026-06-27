@@ -29,6 +29,7 @@ import StrategicCommentGenerator from "@/components/StrategicCommentGenerator/St
 import ProfileVisitorTracker from "@/components/ProfileVisitorTracker/ProfileVisitorTracker";
 import VideoScriptGenerator from "@/components/VideoScriptGenerator/VideoScriptGenerator";
 import TwitterThreadPanel from "@/components/TwitterThreadPanel/TwitterThreadPanel";
+import UpgradeModal from "@/components/UpgradeModal/UpgradeModal";
 import { loadPosts, savePosts, todayKey } from "@/lib/storage";
 import { loadSettings, saveSettings } from "@/lib/settings";
 import { useReminderScheduler } from "@/lib/useReminderScheduler";
@@ -71,6 +72,7 @@ export default function Home() {
   const [videoScriptPost, setVideoScriptPost] = useState(null);
   const [showTwitterThread, setShowTwitterThread] = useState(false);
   const [twitterPost, setTwitterPost] = useState(null);
+  const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
 
   const [historyPage, setHistoryPage] = useState(1);
   const HISTORY_PAGE_SIZE = 10;
@@ -386,7 +388,13 @@ export default function Home() {
           body: JSON.stringify({ topic: prompt || undefined }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Generation failed");
+        if (!res.ok) {
+          if (data.error === "LIMIT_REACHED") {
+            setIsUpgradeOpen(true);
+            throw new Error(data.message || "Limit reached. Please upgrade to Pro.");
+          }
+          throw new Error(data.error || "Generation failed");
+        }
 
         // Append follower CTA if this is the 7th post in rotation
         const content = followerCTA
@@ -555,6 +563,7 @@ export default function Home() {
         onOpenSettings={() => setSettingsOpen(true)}
         onToggleTrending={() => setShowTrending(!showTrending)}
         showTrending={showTrending}
+        onUpgradeClick={() => setIsUpgradeOpen(true)}
       />
 
       <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-4">
@@ -876,6 +885,15 @@ export default function Home() {
         />
       )}
       </div>
+
+      <UpgradeModal
+        isOpen={isUpgradeOpen}
+        onClose={() => setIsUpgradeOpen(false)}
+        onUpgradeSuccess={() => {
+          setUser((prev) => (prev ? { ...prev, isPremium: true } : null));
+          showToast("Successfully upgraded to Pro Creator!");
+        }}
+      />
 
       {/* Auth overlay modal */}
       {!user && (

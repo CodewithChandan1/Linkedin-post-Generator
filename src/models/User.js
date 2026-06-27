@@ -14,6 +14,7 @@ const UserSchema = new mongoose.Schema(
       achievements: [{ type: String }],
       projects: [{ type: String }],
     },
+    isPremium: { type: Boolean, default: false },
     resetCode: { type: String },
     resetCodeExpires: { type: Date },
   },

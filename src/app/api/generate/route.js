@@ -1,6 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
 import { getTodayTopic } from "@/lib/profile";
 import { getSessionUser } from "@/lib/auth";
+import { connectDB } from "@/lib/db";
+import Post from "@/models/Post";
 
 export const runtime = "nodejs";
 
@@ -44,6 +46,23 @@ export async function POST(req) {
   if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // Gating limit check (5 free posts/month for non-premium users)
+  if (process.env.NEXT_PUBLIC_ENABLE_MONETIZATION === "true" && !user.isPremium) {
+    try {
+      await connectDB();
+      const count = await Post.countDocuments({ userId: user._id });
+      if (count >= 5) {
+        return Response.json({
+          error: "LIMIT_REACHED",
+          message: "You have reached the monthly limit of 5 free posts. Please upgrade to Pro to generate unlimited posts.",
+        }, { status: 403 });
+      }
+    } catch (dbErr) {
+      console.error("Monetization limit check db error:", dbErr);
+    }
+  }
+
   const userProfile = user.profile;
 
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;

@@ -14,10 +14,24 @@ export default function TopNav({ user, onLogout, onOpenSettings, onToggleTrendin
           {user && (
             <div className="hidden md:flex items-center gap-2 mr-2 bg-slate-50 border border-slate-100 rounded-full px-3 py-1">
               <div className="w-5 h-5 rounded-full bg-linkedin text-white flex items-center justify-center text-[10px] font-bold">
-                {user.profile?.initials || user.name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "U"}
+                {user.profile?.name ? user.profile.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) : "U"}
               </div>
-              <span className="text-xs font-semibold text-gray-700 max-w-[120px] truncate">{user.name}</span>
+              <span className="text-xs font-semibold text-gray-700 max-w-[120px] truncate">{user.profile?.name || user.email}</span>
             </div>
+          )}
+          {user && process.env.NEXT_PUBLIC_ENABLE_MONETIZATION === "true" && (
+            user.isPremium ? (
+              <span className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-black text-amber-600 bg-amber-50 border border-amber-200/50 px-2 py-0.5 rounded-full uppercase tracking-wider select-none mr-2">
+                👑 Pro
+              </span>
+            ) : (
+              <button
+                onClick={onUpgradeClick}
+                className="flex items-center gap-1 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 px-3 py-1.5 rounded-full shadow-sm hover:shadow transition-all duration-200 mr-2"
+              >
+                <span>Upgrade to Pro</span>
+              </button>
+            )
           )}
           <button
             onClick={onToggleTrending}

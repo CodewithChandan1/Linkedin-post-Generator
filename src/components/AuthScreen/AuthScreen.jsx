@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Lock, Mail, User, Eye, EyeOff, PenTool, Key } from "lucide-react";
 
 export default function AuthScreen({ onAuthSuccess, isModal = false }) {
@@ -15,6 +15,72 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
   const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
+
+  const handleGoogleCallback = async (response) => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken: response.credential }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Google sign-in failed");
+      }
+      if (data.success) {
+        onAuthSuccess(data.user);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!document.getElementById("google-gsi-client")) {
+      const script = document.createElement("script");
+      script.id = "google-gsi-client";
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+    }
+
+    const initGoogle = () => {
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        window.google.accounts.id.initialize({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "150131132029-jn9dbq4tkakerba5ri1ds78auhthdaka.apps.googleusercontent.com",
+          callback: handleGoogleCallback,
+        });
+
+        const googleBtn = document.getElementById("google-signin-btn");
+        if (googleBtn) {
+          window.google.accounts.id.renderButton(googleBtn, {
+            theme: "outline",
+            size: "large",
+            width: googleBtn.clientWidth || 382,
+            text: "signin_with",
+            shape: "rectangular",
+          });
+        }
+      }
+    };
+
+    if (window.google) {
+      initGoogle();
+    } else {
+      const checkScript = setInterval(() => {
+        if (window.google) {
+          initGoogle();
+          clearInterval(checkScript);
+        }
+      }, 100);
+      return () => clearInterval(checkScript);
+    }
+  }, [mode]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -348,6 +414,18 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
             </button>
           </div>
         </form>
+
+        {/* OR DIVIDER & GOOGLE SIGN IN */}
+        {(mode === "login" || mode === "signup") && (
+          <div className="space-y-4 pt-4">
+            <div className="relative flex py-1 items-center">
+              <div className="flex-grow border-t border-gray-200"></div>
+              <span className="flex-shrink mx-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Or</span>
+              <div className="flex-grow border-t border-gray-200"></div>
+            </div>
+            <div id="google-signin-btn" className="w-full flex justify-center min-h-[44px]" />
+          </div>
+        )}
 
         {/* BOTTOM LINKS */}
         <div className="mt-4 border-t border-gray-200 pt-4 text-center">
