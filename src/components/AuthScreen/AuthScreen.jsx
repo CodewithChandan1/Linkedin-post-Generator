@@ -464,7 +464,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
   );
 
   return (
-    <div className="min-h-screen bg-[#f3f2ef] flex flex-col md:flex-row relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-[#f3f2ef] flex flex-col md:flex-row relative font-sans">
       {/* INJECT CUSTOM CSS ANIMATIONS */}
       <style>{`
         @keyframes float-slow {
@@ -513,7 +513,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
       <div className="hidden md:flex md:w-1/2 lg:w-3/5 relative overflow-hidden flex-col justify-between p-12 lg:p-16 border-r border-slate-200 z-10">
 
         {/* Brand header */}
-        <div className="flex items-center gap-2 z-10">
+        <div className="flex items-center gap-2 z-10 mb-4">
           <PostedInLogo size="md" />
         </div>
 
@@ -551,7 +551,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
 
               <div className="space-y-2 mb-4">
                 <p className="text-xs text-slate-700 leading-relaxed font-mono">
-                  🚀 Just integrated Lazy Email Verification into the Next.js SaaS architecture!
+                  Just integrated Lazy Email Verification into the Next.js SaaS architecture!
                 </p>
                 <p className="text-xs text-slate-600 leading-relaxed font-mono">
                   Instead of blocking registration, verify email address only when activating premium notifications. Better UX = Higher conversion.
@@ -593,8 +593,8 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
         <div className="pt-6 z-10 overflow-hidden">
           <div className="flex items-center gap-2 mb-3">
             <div className="flex">
-              {[1,2,3,4,5].map(i => (
-                <svg key={i} className="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              {[1, 2, 3, 4, 5].map(i => (
+                <svg key={i} className="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
               ))}
             </div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">What our users say</span>
@@ -634,16 +634,16 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
         </div>
       </div>
 
-      {/* RIGHT COLUMN: Sleek Centered Form Card */}
-      <div className="flex-1 flex flex-col justify-center p-6 sm:p-12 lg:p-16 z-10">
-        <div className="w-full max-w-md mx-auto space-y-6">
-          <div className="space-y-2">
+      {/* RIGHT COLUMN: Form — full height scroll on mobile */}
+      <div className="flex-1 flex flex-col justify-center min-h-screen md:min-h-0 overflow-y-auto py-8 px-4 sm:px-8 md:p-12 lg:p-16 z-10">
+        <div className="w-full max-w-md mx-auto space-y-5">
+          <div className="space-y-1.5">
             {/* Logo for mobile devices */}
-            <div className="flex md:hidden items-center mb-6">
+            <div className="flex md:hidden items-center mb-5">
               <PostedInLogo size="md" />
             </div>
 
-            <h2 className="text-3xl font-black tracking-tight text-slate-800">
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-800">
               {title}
             </h2>
             <p className="text-sm text-slate-500 font-medium">
@@ -651,7 +651,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
             </p>
           </div>
 
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
             {formContent}
           </div>
         </div>
