@@ -410,8 +410,8 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
             <span className="flex-shrink mx-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Or</span>
             <div className="flex-grow border-t border-slate-200"></div>
           </div>
-          <div className="flex justify-center w-full min-h-[44px]">
-            <div id="google-signin-btn" className="w-full max-w-[360px]" />
+          <div className="flex justify-center w-full min-h-[44px] overflow-hidden">
+            <div id="google-signin-btn" className="w-full max-w-full" />
           </div>
         </div>
       )}
@@ -653,6 +653,57 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
 
           <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
             {formContent}
+          </div>
+
+          {/* MOBILE-ONLY: Stats + Reviews (hidden on md+) */}
+          <div className="md:hidden space-y-6 pt-2">
+            {/* Stats row */}
+            <div className="grid grid-cols-3 gap-4 bg-white border border-slate-200/80 rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+              <div className="text-center">
+                <div className="text-lg font-black text-slate-800">5k+</div>
+                <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Posts Created</div>
+              </div>
+              <div className="text-center border-x border-slate-100">
+                <div className="text-lg font-black text-slate-800">10x</div>
+                <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Faster Output</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-black text-slate-800">4.9★</div>
+                <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">User Rating</div>
+              </div>
+            </div>
+
+            {/* Reviews horizontal scroll */}
+            <div className="overflow-hidden">
+              <div className="flex items-center gap-2 mb-2.5">
+                <div className="flex">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <svg key={i} className="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                  ))}
+                </div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">What our users say</span>
+              </div>
+              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {[
+                  { initials: "RV", name: "Rahul Verma", role: "SDE @ Flipkart", color: "from-violet-500 to-purple-600", quote: "LinkedIn reach tripled in 3 weeks. Insanely good quality." },
+                  { initials: "PS", name: "Priya Sharma", role: "Founder @ BuildFast", color: "from-emerald-500 to-teal-600", quote: "I post every day now. No more blank screen." },
+                  { initials: "AK", name: "Arjun Kumar", role: "PM @ Razorpay", color: "from-orange-500 to-red-500", quote: "10x faster content. Followers doubled in a month." },
+                  { initials: "NK", name: "Neha Kapoor", role: "Dev Advocate", color: "from-blue-500 to-cyan-500", quote: "AI understands tech. My posts actually perform now." },
+                  { initials: "MS", name: "Mohit Singh", role: "CTO @ Stackify", color: "from-rose-500 to-pink-600", quote: "Saved 2+ hours a week. Worth every rupee." },
+                ].map((r, idx) => (
+                  <div key={idx} className="flex items-start gap-2.5 bg-white border border-slate-200/80 rounded-xl px-3.5 py-3 shrink-0 w-[200px] snap-start shadow-sm">
+                    <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${r.color} flex items-center justify-center text-white font-bold text-[9px] shrink-0`}>
+                      {r.initials}
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-bold text-slate-800 block truncate">{r.name}</span>
+                      <span className="text-[9px] text-slate-400 block truncate mb-1">{r.role}</span>
+                      <p className="text-[10px] text-slate-600 leading-relaxed italic line-clamp-2">&ldquo;{r.quote}&rdquo;</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
