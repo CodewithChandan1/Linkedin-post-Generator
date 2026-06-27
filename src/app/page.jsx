@@ -39,6 +39,7 @@ import { useReminderScheduler } from "@/lib/useReminderScheduler";
 import { useLinkedIn } from "@/lib/useLinkedIn";
 import { getNextFormat, advanceRotation, computeDepthScore } from "@/lib/formatRotation";
 import { buildPostImageUrl } from "@/lib/imageUtils";
+import { pushNotification } from "@/components/NotificationBell/NotificationBell";
 import {
   Wrench, Search, Target, Trophy, Calendar, Newspaper,
   MessageSquare, Eye, Sparkles, FileText, Video,
@@ -99,6 +100,18 @@ export default function Home() {
         const data = await res.json();
         if (data.success && data.user) {
           setUser(data.user);
+          // Welcome notification — once per session
+          if (!sessionStorage.getItem("postedin_welcomed")) {
+            sessionStorage.setItem("postedin_welcomed", "1");
+            setTimeout(() => {
+              pushNotification({
+                type: "success",
+                title: `Welcome back, ${data.user.profile?.name?.split(" ")[0] || "there"}! 👋`,
+                message: "Your daily LinkedIn post is being prepared. Check below!",
+                icon: "🚀",
+              });
+            }, 1000);
+          }
         }
       } catch (err) {
         console.error("Auth check failed:", err);
@@ -449,6 +462,13 @@ export default function Home() {
           }
           return [newPost, ...prev];
         });
+
+        // Push in-app notification
+        pushNotification({
+          type: "success",
+          title: "New post generated! ✨",
+          message: content.slice(0, 80) + (content.length > 80 ? "…" : ""),
+        });
       } catch (e) {
         setError(e.message);
       } finally {
@@ -488,6 +508,12 @@ export default function Home() {
         setGoldenHourPost({ ...post, postedAt });
         advanceRotation();
         showToast("Posted to LinkedIn with image! Reply to your first comment within 10 min.");
+        pushNotification({
+          type: "success",
+          title: "Posted to LinkedIn! 🚀",
+          message: "Reply to the first comment within 10 minutes to boost reach.",
+          icon: "🚀",
+        });
       } catch (err) {
         showToast(`Post failed: ${err.message}`);
       }
@@ -505,6 +531,12 @@ export default function Home() {
       setGoldenHourPost({ ...post, postedAt });
       advanceRotation();
       showToast("Opened LinkedIn — paste and post!");
+      pushNotification({
+        type: "reminder",
+        title: "LinkedIn tab opened 📋",
+        message: "Paste your post and publish for maximum reach today.",
+        icon: "📋",
+      });
     }
   }
 
@@ -553,6 +585,12 @@ export default function Home() {
         )
       );
       showToast("Post humanized — AI-detection risk reduced");
+      pushNotification({
+        type: "info",
+        title: "Post humanized 🤖→✍️",
+        message: "AI-detection risk reduced. Your post now sounds more authentic.",
+        icon: "✍️",
+      });
     } catch (err) {
       showToast(`Humanizer failed: ${err.message}`);
     } finally {

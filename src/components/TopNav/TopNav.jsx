@@ -1,5 +1,6 @@
 import { Settings, TrendingUp, LogOut, Menu, BarChart3 } from "lucide-react";
 import PostedInLogo from "@/components/PostedInLogo/PostedInLogo";
+import NotificationBell from "@/components/NotificationBell/NotificationBell";
 
 export default function TopNav({ user, onLogout, onOpenSettings, onToggleTrending, showTrending, onUpgradeClick, onOpenLeftDrawer, onOpenRightDrawer }) {
   return (
@@ -59,6 +60,10 @@ export default function TopNav({ user, onLogout, onOpenSettings, onToggleTrendin
             <Settings size={15} />
             <span className="hidden sm:inline">Settings</span>
           </button>
+
+          {/* In-app notification bell */}
+          {user && <NotificationBell />}
+
           {user && onLogout && (
             <button
               onClick={onLogout}
