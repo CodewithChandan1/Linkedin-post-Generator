@@ -59,10 +59,21 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
 
         const googleBtn = document.getElementById("google-signin-btn");
         if (googleBtn) {
+          let buttonWidth = 360;
+          if (typeof window !== "undefined") {
+            const screenWidth = window.innerWidth;
+            if (screenWidth < 360) {
+              buttonWidth = 240;
+            } else if (screenWidth < 480) {
+              buttonWidth = 280;
+            } else if (screenWidth < 768) {
+              buttonWidth = 320;
+            }
+          }
           window.google.accounts.id.renderButton(googleBtn, {
             theme: "outline",
             size: "large",
-            width: googleBtn.clientWidth || 360,
+            width: buttonWidth,
             text: "signin_with",
             shape: "rectangular",
           });
