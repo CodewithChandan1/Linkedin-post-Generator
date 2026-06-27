@@ -1,15 +1,12 @@
+import Image from "next/image";
 import { Settings, TrendingUp, LogOut } from "lucide-react";
-import { LinkedInLogo } from "@/components/Icons/Icons";
 
-export default function TopNav({ user, onLogout, onOpenSettings, onToggleTrending, showTrending }) {
+export default function TopNav({ user, onLogout, onOpenSettings, onToggleTrending, showTrending, onUpgradeClick }) {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
-        <LinkedInLogo size={28} color="#0A66C2" />
-        <div className="leading-tight">
-          <p className="font-semibold text-gray-900 text-sm">Auto-Post Generator</p>
-          <p className="text-[11px] text-gray-500">Daily AI posts, built for your reach</p>
-        </div>
+        <Image src="/logo.png" alt="PostedIn" width={120} height={32} className="h-8 w-auto object-contain" priority />
+
         <div className="ml-auto flex items-center gap-2">
           {user && (
             <div className="hidden md:flex items-center gap-2 mr-2 bg-slate-50 border border-slate-100 rounded-full px-3 py-1">

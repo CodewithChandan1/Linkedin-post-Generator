@@ -517,7 +517,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
             <PenTool size={22} className="stroke-[2.5]" />
           </div>
           <span className="font-extrabold text-xl tracking-tight text-[#1d2226]">
-            DevPost AI
+            PostedIn
           </span>
         </div>
 
@@ -648,7 +648,7 @@ export default function AuthScreen({ onAuthSuccess, isModal = false }) {
                 <PenTool size={16} className="stroke-[2.5]" />
               </div>
               <span className="font-extrabold text-base tracking-tight text-slate-800">
-                DevPost AI
+                PostedIn
               </span>
             </div>
 

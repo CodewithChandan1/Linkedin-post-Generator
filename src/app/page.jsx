@@ -955,7 +955,7 @@ function LoadingScreen() {
         {/* Brand Text & Cycling Status */}
         <div className="space-y-2.5">
           <h1 className="text-2xl font-black tracking-tight text-slate-800">
-            DevPost <span className="text-[#0A66C2]">AI</span>
+            Posted<span className="text-[#0A66C2]">In</span>
           </h1>
           <div className="h-6 flex items-center justify-center">
             <p key={loadMsgIndex} className="text-xs text-slate-400 font-bold uppercase tracking-wider animate-fade-in-up">
@@ -972,7 +972,7 @@ function LoadingScreen() {
 
       {/* Small subtle branding footer */}
       <div className="absolute bottom-8 left-0 right-0 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest pointer-events-none opacity-80">
-        LinkedIn Creator Suite
+        PostedIn — AI-Powered LinkedIn Content
       </div>
     </div>
   );
