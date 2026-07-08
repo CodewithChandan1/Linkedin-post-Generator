@@ -26,14 +26,12 @@ export function removeClient(userId, pushFn) {
 }
 
 /**
- * Emit a notification to all open browser tabs of a user.
+ * Emit a notification to all open browser tabs of a user AND persist to DB.
  *
  * @param {string} userId
  * @param {{ type?: string, title: string, message?: string, icon?: string }} payload
  */
-export function emitNotification(userId, payload) {
-  const fns = clients.get(userId);
-  if (!fns || fns.size === 0) return;
+export async function emitNotification(userId, payload) {
   const event = {
     id: Date.now().toString(),
     type: payload.type || "info",
@@ -43,5 +41,29 @@ export function emitNotification(userId, payload) {
     createdAt: new Date().toISOString(),
     read: false,
   };
-  fns.forEach((fn) => fn(event));
+
+  // Persist to MongoDB (import lazily to avoid issues in edge runtime)
+  try {
+    const { connectDB } = await import("@/lib/db");
+    const { default: Notification } = await import("@/models/Notification");
+    await connectDB();
+    const saved = await Notification.create({
+      userId,
+      type: event.type,
+      title: event.title,
+      message: event.message,
+      icon: event.icon,
+    });
+    // Use MongoDB _id as the canonical id
+    event.id = saved._id.toString();
+    event._id = event.id;
+  } catch (err) {
+    console.error("emitNotification: DB save failed", err?.message);
+  }
+
+  // Push to all connected SSE clients for this user
+  const fns = clients.get(userId);
+  if (fns && fns.size > 0) {
+    fns.forEach((fn) => fn(event));
+  }
 }

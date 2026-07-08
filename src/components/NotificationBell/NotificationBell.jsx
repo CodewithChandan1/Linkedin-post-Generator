@@ -1,58 +1,49 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Bell, X, Check, Mail, Clock, Sparkles, CheckCheck } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { Bell, X, Check, Clock, Sparkles, CheckCheck, ChevronRight } from "lucide-react";
 
-// ── Notification store (module-level so it persists across renders) ──────────
-const STORAGE_KEY = "postedin_notifications";
-
-function loadNotifs() {
-  if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-  } catch {
-    return [];
-  }
+// ── localStorage: ONLY used for unread badge count (instant UI, no page reload needed) ──
+const BADGE_KEY = "postedin_unread_count";
+function getBadgeCount() {
+  if (typeof window === "undefined") return 0;
+  return parseInt(localStorage.getItem(BADGE_KEY) || "0", 10);
 }
-
-function saveNotifs(notifs) {
+function setBadgeCount(n) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(notifs.slice(0, 50)));
+  localStorage.setItem(BADGE_KEY, String(Math.max(0, n)));
 }
 
-// ── Public helper: push a notification from anywhere in the app ──────────────
+// ── Public helper — called from anywhere in the app to push a notification ───
+// Saves directly to server. Badge count incremented locally for instant bell update.
 export function pushNotification({ type = "info", title, message, icon }) {
   if (typeof window === "undefined") return;
-  const notifs = loadNotifs();
-  notifs.unshift({
-    id: Date.now().toString(),
-    type,       // "info" | "success" | "reminder" | "warning"
-    title,
-    message,
-    icon,
-    read: false,
-    createdAt: new Date().toISOString(),
-  });
-  saveNotifs(notifs);
-  // Dispatch custom event so the panel updates
-  window.dispatchEvent(new Event("postedin:notification"));
+  // Increment badge immediately (optimistic)
+  setBadgeCount(getBadgeCount() + 1);
+  window.dispatchEvent(new Event("postedin:badge"));
+
+  // Persist to server
+  fetch("/api/notifications", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type, title, message: message || "", icon: icon || "" }),
+  }).catch(() => {});
 }
 
-// ── Icon / color helpers ─────────────────────────────────────────────────────
+// ── Styles / icons ───────────────────────────────────────────────────────────
 const TYPE_STYLE = {
   success:  { bg: "bg-emerald-50", icon: "text-emerald-500", dot: "bg-emerald-500" },
   reminder: { bg: "bg-blue-50",    icon: "text-blue-500",    dot: "bg-blue-500"    },
   warning:  { bg: "bg-amber-50",   icon: "text-amber-500",   dot: "bg-amber-500"   },
   info:     { bg: "bg-slate-50",   icon: "text-slate-500",   dot: "bg-slate-400"   },
 };
-
 const TYPE_ICON = {
   success:  <Check size={14} />,
   reminder: <Clock size={14} />,
   warning:  <Bell size={14} />,
   info:     <Sparkles size={14} />,
 };
-
 function timeAgo(iso) {
   const diff = Date.now() - new Date(iso).getTime();
   const m = Math.floor(diff / 60000);
@@ -65,98 +56,127 @@ function timeAgo(iso) {
 
 // ── Component ────────────────────────────────────────────────────────────────
 export default function NotificationBell() {
-  const [open, setOpen] = useState(false);
-  const [notifs, setNotifs] = useState([]);
+  const router  = useRouter();
   const panelRef = useRef(null);
+  const [open, setOpen]     = useState(false);
+  const [notifs, setNotifs] = useState([]);
+  const [badge, setBadge]   = useState(getBadgeCount);
+  const [loading, setLoading] = useState(false);
 
-  function refresh() {
-    setNotifs(loadNotifs());
-  }
+  // ── Fetch notifications from server ─────────────────────────────────────────
+  const fetchNotifs = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res  = await fetch("/api/notifications");
+      const data = await res.json();
+      if (data.success) {
+        setNotifs(data.notifications);
+        // Sync real unread count to badge
+        const unread = data.notifications.filter((n) => !n.read).length;
+        setBadge(unread);
+        setBadgeCount(unread);
+      }
+    } catch { /* keep stale */ }
+    finally { setLoading(false); }
+  }, []);
 
-  // ── SSE subscription for real-time server-pushed notifications ──────────────
+  // Fetch on mount (so badge is accurate on page load)
+  useEffect(() => { fetchNotifs(); }, [fetchNotifs]);
+
+  // Badge update from pushNotification() calls
+  useEffect(() => {
+    const update = () => setBadge(getBadgeCount());
+    window.addEventListener("postedin:badge", update);
+    return () => window.removeEventListener("postedin:badge", update);
+  }, []);
+
+  // SSE — real-time server-pushed notifications
   useEffect(() => {
     let es;
     try {
       es = new EventSource("/api/notifications/stream");
-
-      es.onmessage = (event) => {
+      es.onmessage = (e) => {
         try {
-          const payload = JSON.parse(event.data);
-          if (!payload?.title) return; // ignore heartbeat/ping frames
-          // Merge into localStorage store
-          const existing = loadNotifs();
-          existing.unshift({ ...payload, read: false });
-          saveNotifs(existing);
-          setNotifs(loadNotifs());
-        } catch { /* ignore malformed frames */ }
-      };
-
-      es.onerror = () => {
-        // Browser will auto-reconnect; nothing to do here
+          const payload = JSON.parse(e.data);
+          if (!payload?.title) return; // heartbeat
+          // Prepend to panel list
+          setNotifs((prev) => [{ ...payload, id: payload._id || payload.id, read: false }, ...prev]);
+          setBadge((b) => { const next = b + 1; setBadgeCount(next); return next; });
+        } catch { /* ignore */ }
       };
     } catch { /* SSE not supported */ }
-
     return () => { if (es) es.close(); };
-  }, []);
-
-  useEffect(() => {
-    refresh();
-    window.addEventListener("postedin:notification", refresh);
-    return () => window.removeEventListener("postedin:notification", refresh);
   }, []);
 
   // Close on outside click
   useEffect(() => {
     if (!open) return;
-    function handleClick(e) {
+    const handler = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false);
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  const unread = notifs.filter((n) => !n.read).length;
-
-  function markAllRead() {
-    const updated = notifs.map((n) => ({ ...n, read: true }));
-    saveNotifs(updated);
-    setNotifs(updated);
+  // ── Actions — all hit server, then sync local state ──────────────────────────
+  async function markAllRead() {
+    setNotifs((prev) => prev.map((n) => ({ ...n, read: true })));
+    setBadge(0); setBadgeCount(0);
+    await fetch("/api/notifications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ all: true }),
+    }).catch(() => {});
   }
 
-  function markRead(id) {
-    const updated = notifs.map((n) => (n.id === id ? { ...n, read: true } : n));
-    saveNotifs(updated);
-    setNotifs(updated);
+  async function markRead(id) {
+    setNotifs((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    setBadge((b) => { const next = Math.max(0, b - 1); setBadgeCount(next); return next; });
+    await fetch("/api/notifications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    }).catch(() => {});
   }
 
-  function remove(id) {
-    const updated = notifs.filter((n) => n.id !== id);
-    saveNotifs(updated);
-    setNotifs(updated);
+  async function remove(id) {
+    const wasUnread = notifs.find((n) => n.id === id && !n.read);
+    setNotifs((prev) => prev.filter((n) => n.id !== id));
+    if (wasUnread) setBadge((b) => { const next = Math.max(0, b - 1); setBadgeCount(next); return next; });
+    await fetch(`/api/notifications?id=${id}`, { method: "DELETE" }).catch(() => {});
   }
 
-  function clearAll() {
-    saveNotifs([]);
+  async function clearAll() {
     setNotifs([]);
+    setBadge(0); setBadgeCount(0);
+    await fetch("/api/notifications?all=true", { method: "DELETE" }).catch(() => {});
+  }
+
+  function handleOpen() {
+    const opening = !open;
+    setOpen(opening);
+    if (opening) {
+      fetchNotifs(); // always refresh from server when panel opens
+    }
   }
 
   return (
     <div className="relative" ref={panelRef}>
-      {/* Bell button */}
+      {/* Bell */}
       <button
-        onClick={() => { setOpen((v) => !v); if (!open) markAllRead(); }}
+        onClick={handleOpen}
         className="relative flex items-center justify-center w-9 h-9 rounded-full text-gray-600 hover:bg-gray-100 transition"
         aria-label="Notifications"
       >
         <Bell size={18} />
-        {unread > 0 && (
+        {badge > 0 && (
           <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center leading-none">
-            {unread > 9 ? "9+" : unread}
+            {badge > 9 ? "9+" : badge}
           </span>
         )}
       </button>
 
-      {/* Panel */}
+      {/* Dropdown panel */}
       {open && (
         <div
           className="absolute right-0 top-11 w-80 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 overflow-hidden"
@@ -164,36 +184,31 @@ export default function NotificationBell() {
         >
           <style>{`
             @keyframes notifSlideIn {
-              from { opacity: 0; transform: scale(0.95) translateY(-8px); }
-              to   { opacity: 1; transform: scale(1)   translateY(0); }
+              from { opacity:0; transform:scale(0.95) translateY(-8px); }
+              to   { opacity:1; transform:scale(1)   translateY(0); }
             }
           `}</style>
+
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <div className="flex items-center gap-2">
               <Bell size={15} className="text-linkedin" />
               <span className="text-sm font-bold text-gray-800">Notifications</span>
-              {unread > 0 && (
+              {badge > 0 && (
                 <span className="text-[10px] font-bold bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">
-                  {unread} new
+                  {badge} new
                 </span>
               )}
             </div>
             <div className="flex items-center gap-1">
               {notifs.length > 0 && (
                 <>
-                  <button
-                    onClick={markAllRead}
-                    title="Mark all read"
-                    className="p-1.5 text-gray-400 hover:text-linkedin hover:bg-blue-50 rounded-lg transition"
-                  >
+                  <button onClick={markAllRead} title="Mark all read"
+                    className="p-1.5 text-gray-400 hover:text-linkedin hover:bg-blue-50 rounded-lg transition">
                     <CheckCheck size={14} />
                   </button>
-                  <button
-                    onClick={clearAll}
-                    title="Clear all"
-                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
-                  >
+                  <button onClick={clearAll} title="Clear all"
+                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition">
                     <X size={14} />
                   </button>
                 </>
@@ -203,7 +218,19 @@ export default function NotificationBell() {
 
           {/* List */}
           <div className="max-h-96 overflow-y-auto divide-y divide-gray-50">
-            {notifs.length === 0 ? (
+            {loading ? (
+              <div className="space-y-0 divide-y divide-gray-50">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex gap-3 px-4 py-3 animate-pulse">
+                    <div className="w-8 h-8 rounded-full bg-gray-100 shrink-0" />
+                    <div className="flex-1 space-y-1.5">
+                      <div className="h-2.5 bg-gray-100 rounded w-3/4" />
+                      <div className="h-2 bg-gray-100 rounded w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : notifs.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center px-4">
                 <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-3">
                   <Bell size={20} className="text-slate-300" />
@@ -212,25 +239,20 @@ export default function NotificationBell() {
                 <p className="text-xs text-gray-400 mt-0.5">No notifications yet.</p>
               </div>
             ) : (
-              notifs.map((n) => {
+              notifs.slice(0, 8).map((n) => {
                 const style = TYPE_STYLE[n.type] || TYPE_STYLE.info;
                 return (
                   <div
-                    key={n.id}
-                    onClick={() => markRead(n.id)}
+                    key={n.id || n._id}
+                    onClick={() => markRead(n.id || n._id)}
                     className={`relative flex gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition ${!n.read ? "bg-blue-50/30" : ""}`}
                   >
-                    {/* Unread dot */}
                     {!n.read && (
                       <span className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full ${style.dot}`} />
                     )}
-
-                    {/* Icon bubble */}
                     <div className={`shrink-0 w-8 h-8 rounded-full ${style.bg} ${style.icon} flex items-center justify-center`}>
                       {n.icon ? <span className="text-sm">{n.icon}</span> : TYPE_ICON[n.type]}
                     </div>
-
-                    {/* Content */}
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-gray-800 leading-snug truncate">{n.title}</p>
                       {n.message && (
@@ -238,10 +260,8 @@ export default function NotificationBell() {
                       )}
                       <p className="text-[10px] text-gray-400 mt-1">{timeAgo(n.createdAt)}</p>
                     </div>
-
-                    {/* Remove */}
                     <button
-                      onClick={(e) => { e.stopPropagation(); remove(n.id); }}
+                      onClick={(e) => { e.stopPropagation(); remove(n.id || n._id); }}
                       className="shrink-0 p-1 text-gray-300 hover:text-gray-500 rounded transition"
                     >
                       <X size={12} />
@@ -253,9 +273,17 @@ export default function NotificationBell() {
           </div>
 
           {/* Footer */}
-          {notifs.length > 0 && (
-            <div className="px-4 py-2.5 border-t border-gray-100 text-center">
-              <span className="text-[10px] text-gray-400">{notifs.length} notification{notifs.length !== 1 ? "s" : ""} total</span>
+          {!loading && (
+            <div className="px-4 py-2.5 border-t border-gray-100 flex items-center justify-between">
+              <span className="text-[10px] text-gray-400">
+                {notifs.length} notification{notifs.length !== 1 ? "s" : ""}
+              </span>
+              <button
+                onClick={() => { setOpen(false); router.push("/notifications"); }}
+                className="flex items-center gap-1 text-xs font-semibold text-[#0A66C2] hover:text-[#0958a8] transition"
+              >
+                View all <ChevronRight size={12} />
+              </button>
             </div>
           )}
         </div>

@@ -21,6 +21,10 @@ const PostSchema = new mongoose.Schema(
     depthLevel: { type: String, default: "Low" },
     humanized: { type: Boolean, default: false },
     humanizeChanges: [{ type: String }],
+    // LinkedIn post tracking
+    linkedInPostId: { type: String, default: "" }, // urn:li:share:... returned after posting
+    statsLastSyncedAt: { type: Date, default: null }, // last time we pulled from LinkedIn API
+    syncPending: { type: Boolean, default: false },   // cron flagged — client should sync on next load
     // Analytics (Phase 6)
     likes: { type: Number, default: 0 },
     comments: { type: Number, default: 0 },

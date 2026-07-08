@@ -9,7 +9,8 @@ const SettingsSchema = new mongoose.Schema(
     pushEnabled: { type: Boolean, default: false },
     topics: { type: mongoose.Schema.Types.Mixed, default: {} },
     emailsSentCount: { type: Number, default: 0 },
-    lastReminderSent: { type: String, default: "" }, // YYYY-MM-DD (IST) — dedupes the daily cron
+    lastReminderSent: { type: String, default: "" },  // YYYY-MM-DD (IST) — dedupes the daily cron
+    lastStreakAlertSent: { type: String, default: "" }, // YYYY-MM-DD (IST) — dedupes streak alert cron
   },
   { timestamps: true }
 );

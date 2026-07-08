@@ -7,6 +7,14 @@
     {
       "path": "/api/cron/send-reminders",
       "schedule": "30 2 * * *"
+    },
+    {
+      "path": "/api/cron/sync-linkedin-stats",
+      "schedule": "30 12 * * *"
+    },
+    {
+      "path": "/api/cron/streak-alert",
+      "schedule": "0 14 * * *"
     }
   ]
 }

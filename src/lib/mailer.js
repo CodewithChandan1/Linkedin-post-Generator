@@ -100,6 +100,123 @@ function buildReminderHtml({ name, previewText, bestTime, appLink, postDate }) {
 </html>`;
 }
 
+// Streak alert email — fires in the evening if today's post hasn't been published yet.
+function buildStreakAlertHtml({ name, streak, appLink, postDate, hoursLeft }) {
+  const streakEmoji = streak >= 30 ? "🏆" : streak >= 14 ? "🔥" : streak >= 7 ? "⚡" : "📈";
+  const urgencyColor = hoursLeft <= 2 ? "#dc2626" : hoursLeft <= 4 ? "#d97706" : "#0A66C2";
+  const urgencyBg = hoursLeft <= 2 ? "#fef2f2" : hoursLeft <= 4 ? "#fffbeb" : "#eff6ff";
+  const urgencyBorder = hoursLeft <= 2 ? "#fecaca" : hoursLeft <= 4 ? "#fde68a" : "#bfdbfe";
+  const urgencyText =
+    hoursLeft <= 2
+      ? "Less than 2 hours left — post NOW to save your streak!"
+      : hoursLeft <= 4
+      ? `About ${hoursLeft} hours left — don't let tonight be the night your streak dies.`
+      : `${hoursLeft} hours left today — you've got time, but don't forget.`;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Streak Alert</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:'Segoe UI',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f8;padding:32px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+          <!-- Header — fire theme -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#c2410c 0%,#ea580c 100%);padding:32px 40px;text-align:center;">
+              <div style="font-size:48px;margin-bottom:8px;">${streakEmoji}</div>
+              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;letter-spacing:-0.5px;">Your streak is at risk!</h1>
+              <p style="margin:8px 0 0;color:rgba(255,255,255,0.9);font-size:15px;">You haven't posted today — don't break the chain</p>
+            </td>
+          </tr>
+
+          <!-- Streak counter -->
+          <tr>
+            <td style="padding:32px 40px 0;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                <tr>
+                  <td style="background:#fff7ed;border:2px solid #fed7aa;border-radius:16px;padding:20px;text-align:center;">
+                    <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#c2410c;text-transform:uppercase;letter-spacing:1px;">Current streak</p>
+                    <p style="margin:0;font-size:52px;font-weight:900;color:#c2410c;line-height:1;">${streak}</p>
+                    <p style="margin:4px 0 0;font-size:14px;color:#9a3412;font-weight:600;">day${streak !== 1 ? "s" : ""} of consistent posting</p>
+                    <p style="margin:8px 0 0;font-size:12px;color:#ea580c;">Miss today → streak resets to 0</p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Urgency box -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                <tr>
+                  <td style="background:${urgencyBg};border:1px solid ${urgencyBorder};border-radius:12px;padding:16px 20px;">
+                    <p style="margin:0;font-size:14px;font-weight:700;color:${urgencyColor};">⏰ ${urgencyText}</p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Body text -->
+              <p style="margin:0 0 8px;font-size:16px;color:#111827;">Hi <strong>${name || "there"}</strong>,</p>
+              <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.7;">
+                You haven't published your LinkedIn post for <strong style="color:#111827;">${postDate}</strong> yet.
+                Your post is already generated and waiting — all it takes is one click.
+              </p>
+
+              <!-- What you'd lose -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+                <tr>
+                  <td style="background:#f9fafb;border-radius:12px;padding:18px 22px;">
+                    <p style="margin:0 0 10px;font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.8px;">Why your streak matters</p>
+                    <p style="margin:0 0 8px;font-size:13px;color:#374151;">📊 LinkedIn algorithm builds topic authority from <strong>consistent</strong> posting</p>
+                    <p style="margin:0 0 8px;font-size:13px;color:#374151;">🎯 Only 3% of LinkedIn users post regularly — you're in that 3%</p>
+                    <p style="margin:0;font-size:13px;color:#374151;">📈 Results compound: a ${streak}-day streak is <strong>momentum you can't buy back</strong></p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                <tr>
+                  <td align="center">
+                    <a href="${appLink}" style="display:inline-block;background:#ea580c;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:16px 48px;border-radius:50px;letter-spacing:0.2px;">
+                      Post Now — Save My Streak →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Footer note -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:14px 20px;text-align:center;">
+                    <p style="margin:0;font-size:13px;color:#9a3412;font-weight:600;">🔥 Don't let a busy day erase ${streak} days of hard work.</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 40px;text-align:center;margin-top:28px;">
+              <p style="margin:0;font-size:12px;color:#9ca3af;line-height:1.6;">
+                You're receiving this because you enabled streak alerts in PostedIn.<br/>
+                <a href="${appLink}" style="color:#0A66C2;text-decoration:none;font-weight:600;">Manage settings</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
 // Sends the daily reminder email. Throws on failure.
 export async function sendReminderMail({ toEmail, name, postPreview }) {
   const gmailUser = process.env.GMAIL_USER;
@@ -131,6 +248,37 @@ export async function sendReminderMail({ toEmail, name, postPreview }) {
     to: toEmail,
     subject: ` Your LinkedIn post for ${today} is ready!`,
     html: buildReminderHtml({ name, previewText, bestTime, appLink, postDate: today }),
+  });
+
+  return { to: toEmail };
+}
+
+// Sends the streak-at-risk alert email.
+export async function sendStreakAlertMail({ toEmail, name, streak, hoursLeft }) {
+  const gmailUser = process.env.GMAIL_USER;
+  const gmailPass = process.env.GMAIL_APP_PASSWORD;
+  if (!gmailUser || !gmailPass) {
+    throw new Error("GMAIL_USER and GMAIL_APP_PASSWORD not set in environment");
+  }
+  if (!toEmail) throw new Error("No destination email provided");
+
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+  const appLink = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: { user: gmailUser, pass: gmailPass },
+  });
+
+  await transporter.sendMail({
+    from: `"PostedIn" <${gmailUser}>`,
+    to: toEmail,
+    subject: `🔥 ${streak}-day streak at risk! Post before midnight to keep it alive`,
+    html: buildStreakAlertHtml({ name, streak, appLink, postDate: today, hoursLeft }),
   });
 
   return { to: toEmail };

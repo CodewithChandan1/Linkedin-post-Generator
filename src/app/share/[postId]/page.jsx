@@ -66,20 +66,32 @@ export async function generateMetadata({ params }) {
     console.error("Failed to construct absolute image url for OG tags:", e);
   }
 
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://postedin.ai";
+
   return {
     title,
     description,
+    alternates: {
+      canonical: `${APP_URL}/share/${postId}`,
+    },
     openGraph: {
       title,
       description,
+      url: `${APP_URL}/share/${postId}`,
       type: "article",
-      images: absoluteImageUrl ? [{ url: absoluteImageUrl }] : [],
+      authors: [postProfile.name],
+      publishedTime: post.postedAt || post.date,
+      tags: post.hashtags || [],
+      images: absoluteImageUrl
+        ? [{ url: absoluteImageUrl, width: 1200, height: 630, alt: title }]
+        : [{ url: `${APP_URL}/logo.png`, width: 1200, height: 630, alt: "PostedIn" }],
     },
     twitter: {
       card: "summary_large_image",
+      site: "@PostedInAI",
       title,
       description,
-      images: absoluteImageUrl ? [absoluteImageUrl] : [],
+      images: absoluteImageUrl ? [absoluteImageUrl] : [`${APP_URL}/logo.png`],
     },
   };
 }
@@ -91,6 +103,50 @@ function formatDate(dateStr) {
   } catch (e) {
     return dateStr;
   }
+}
+
+// Article structured data for SEO + GEO (AI search engines read this)
+function ArticleJsonLd({ post, postProfile, postId }) {
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://postedin.ai";
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SocialMediaPosting",
+    "headline": `LinkedIn post by ${postProfile.name}: ${post.topic || "Developer Insight"}`,
+    "description": post.content.slice(0, 200),
+    "text": post.content,
+    "url": `${APP_URL}/share/${postId}`,
+    "datePublished": post.postedAt || post.date,
+    "dateModified": post.updatedAt || post.date,
+    "author": {
+      "@type": "Person",
+      "name": postProfile.name,
+      "jobTitle": postProfile.headline,
+      "address": { "@type": "PostalAddress", "addressCountry": "IN" },
+      "knowsAbout": postProfile.stack || [],
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "PostedIn",
+      "url": APP_URL,
+      "logo": { "@type": "ImageObject", "url": `${APP_URL}/logo.png` },
+    },
+    "keywords": (post.hashtags || []).join(", "),
+    "sharedContent": {
+      "@type": "WebPage",
+      "url": "https://www.linkedin.com",
+    },
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "PostedIn",
+      "url": APP_URL,
+    },
+  };
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
 }
 
 export default async function SharePage({ params }) {
@@ -133,6 +189,8 @@ export default async function SharePage({ params }) {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+      {/* Structured data for SEO + GEO + AEO */}
+      <ArticleJsonLd post={post} postProfile={postProfile} postId={postId} />
       {/* Top Banner Loop */}
       <div className="bg-gradient-to-r from-linkedin via-sky-600 to-indigo-600 py-3 px-4 text-center text-xs font-semibold tracking-wide flex items-center justify-center gap-2">
         <Sparkles size={14} className="animate-pulse" />
@@ -144,7 +202,6 @@ export default async function SharePage({ params }) {
           Create Yours Now <ExternalLink size={10} />
         </Link>
       </div>
-
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-8 lg:py-12 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* Left Column: Author Bio (Bento Card style) */}
         <section className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6 space-y-6">

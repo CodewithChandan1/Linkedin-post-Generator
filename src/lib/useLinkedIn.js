@@ -90,12 +90,44 @@ export function useLinkedIn() {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Post failed");
-        return data;
+        return data; // { success, postId: "urn:li:share:..." }
       } catch (err) {
         setError(err.message);
         throw err;
       } finally {
         setLoading(false);
+      }
+    },
+    [connection]
+  );
+
+  // Sync stats for a batch of posts that have a linkedInPostId.
+  // Returns array of { postId, likes, comments } for successful syncs.
+  const syncStats = useCallback(
+    async (postsToSync) => {
+      if (!connection?.accessToken) return [];
+      if (!Array.isArray(postsToSync) || postsToSync.length === 0) return [];
+
+      const eligible = postsToSync.filter((p) => p.linkedInPostId);
+      if (eligible.length === 0) return [];
+
+      try {
+        const res = await fetch("/api/linkedin/stats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            accessToken: connection.accessToken,
+            posts: eligible.map((p) => ({
+              postId: p.id,
+              linkedInPostId: p.linkedInPostId,
+            })),
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Stats sync failed");
+        return data.synced || [];
+      } catch {
+        return [];
       }
     },
     [connection]
@@ -116,6 +148,7 @@ export function useLinkedIn() {
     connect,
     disconnect,
     post,
+    syncStats,
     clearError: () => setError(""),
   };
 }

@@ -175,6 +175,7 @@ export default function Home() {
             depthLevel: p.depthLevel,
             humanized: p.humanized,
             humanizeChanges: p.humanizeChanges,
+            linkedInPostId: p.linkedInPostId || "",
             likes: p.likes || 0,
             comments: p.comments || 0,
             shares: p.shares || 0,
@@ -198,6 +199,47 @@ export default function Home() {
           });
           if (Object.keys(analyticsObj).length > 0) {
             window.localStorage.setItem("linkedin_post_analytics", JSON.stringify(analyticsObj));
+          }
+
+          // Auto-sync pending stats for posts flagged by cron
+          const pendingSync = dataPosts.posts.filter(
+            (p) => p.syncPending && p.linkedInPostId
+          );
+          if (pendingSync.length > 0) {
+            // Defer so UI renders first
+            setTimeout(async () => {
+              try {
+                const liConnection = JSON.parse(
+                  window.localStorage.getItem("linkedin_connection") || "null"
+                );
+                if (!liConnection?.accessToken) return;
+
+                const res = await fetch("/api/linkedin/stats", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    accessToken: liConnection.accessToken,
+                    posts: pendingSync.map((p) => ({
+                      postId: p.postId,
+                      linkedInPostId: p.linkedInPostId,
+                    })),
+                  }),
+                });
+                const data = await res.json();
+                if (data.synced?.length > 0) {
+                  setPosts((prev) =>
+                    prev.map((p) => {
+                      const updated = data.synced.find((s) => s.postId === p.id);
+                      return updated
+                        ? { ...p, likes: updated.likes, comments: updated.comments }
+                        : p;
+                    })
+                  );
+                }
+              } catch {
+                // silent — stats sync is best-effort
+              }
+            }, 2000);
           }
         } else if (localPosts && localPosts.length > 0) {
           // Migrate local posts to MongoDB
@@ -306,6 +348,7 @@ export default function Home() {
             views: post.views || 0,
             impressions: post.impressions || 0,
             clicks: post.clicks || 0,
+            linkedInPostId: post.linkedInPostId || "",
           }),
         }).catch((err) => console.error("Error syncing post to MongoDB:", err));
       }
@@ -497,11 +540,16 @@ export default function Home() {
     if (linkedin.isConnected) {
       // Use LinkedIn API for real one-click posting with image
       try {
-        await linkedin.post(text, post.imageUrl || "");
+        const result = await linkedin.post(text, post.imageUrl || "");
         const postedAt = new Date().toISOString();
+        // result.postId = LinkedIn URN e.g. "urn:li:share:7123456789"
+        const linkedInPostId = result?.postId || "";
+
         setPosts((prev) =>
           prev.map((p) =>
-            p.id === post.id ? { ...p, status: "posted", postedAt } : p
+            p.id === post.id
+              ? { ...p, status: "posted", postedAt, linkedInPostId }
+              : p
           )
         );
         // Activate Golden Hour timer
@@ -514,6 +562,28 @@ export default function Home() {
           message: "Reply to the first comment within 10 minutes to boost reach.",
           icon: "",
         });
+
+        // Schedule auto stats sync — pull reactions/comments after golden hour (90 min)
+        // and again at 24 hours when engagement stabilises
+        if (linkedInPostId) {
+          const scheduleSync = (delayMs) => {
+            setTimeout(async () => {
+              const synced = await linkedin.syncStats([
+                { id: post.id, linkedInPostId },
+              ]);
+              if (synced.length > 0) {
+                const { likes, comments: commentCount } = synced[0];
+                setPosts((prev) =>
+                  prev.map((p) =>
+                    p.id === post.id ? { ...p, likes, comments: commentCount } : p
+                  )
+                );
+              }
+            }, delayMs);
+          };
+          scheduleSync(90 * 60 * 1000);       // after golden hour
+          scheduleSync(24 * 60 * 60 * 1000);  // after 24 hours
+        }
       } catch (err) {
         showToast(`Post failed: ${err.message}`);
       }
@@ -563,6 +633,50 @@ export default function Home() {
           : p
       )
     );
+  }
+
+  // LinkedIn Stats auto-sync — called from GrowthDashboard "Sync Now" button
+  async function handleSyncLinkedInStats() {
+    const liConnection = JSON.parse(
+      window.localStorage.getItem("linkedin_connection") || "null"
+    );
+    if (!liConnection?.accessToken) return 0;
+
+    // Find all posted posts that have a linkedInPostId
+    const eligible = posts.filter(
+      (p) => p.status === "posted" && p.linkedInPostId
+    );
+    if (eligible.length === 0) return 0;
+
+    try {
+      const res = await fetch("/api/linkedin/stats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accessToken: liConnection.accessToken,
+          posts: eligible.map((p) => ({
+            postId: p.id,
+            linkedInPostId: p.linkedInPostId,
+          })),
+        }),
+      });
+      const data = await res.json();
+      if (data.synced?.length > 0) {
+        setPosts((prev) =>
+          prev.map((p) => {
+            const updated = data.synced.find((s) => s.postId === p.id);
+            return updated
+              ? { ...p, likes: updated.likes, comments: updated.comments }
+              : p;
+          })
+        );
+        showToast(`Stats synced for ${data.synced.length} post${data.synced.length !== 1 ? "s" : ""}!`);
+      }
+      return data.synced?.length || 0;
+    } catch (err) {
+      console.error("Stats sync failed:", err);
+      return 0;
+    }
   }
 
   // AI Humanizer — second Gemini pass to make post sound authentic
@@ -967,6 +1081,7 @@ export default function Home() {
             onOpenContentCalendar={() => setShowContentCalendar(true)}
             onRefreshPost={handleRefreshPost}
             onUpdatePostMetrics={handleUpdatePostMetrics}
+            onSyncLinkedInStats={handleSyncLinkedInStats}
           />
         )}
         {showContentCalendar && (

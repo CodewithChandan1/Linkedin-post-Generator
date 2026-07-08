@@ -35,6 +35,7 @@ export default function GrowthDashboard({
   onOpenContentCalendar,
   onRefreshPost,
   onUpdatePostMetrics,
+  onSyncLinkedInStats,
   settings,
 }) {
   const [analyticsData, setAnalyticsData] = useState(() => loadAnalytics());
@@ -42,6 +43,8 @@ export default function GrowthDashboard({
   const [editMetrics, setEditMetrics] = useState({});
   const [tab, setTab] = useState("overview"); // overview | analytics | analyzer | evergreen
   const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState(null); // { count, timestamp }
 
   const streak = useMemo(() => computeStreak(posts), [posts]);
   const postedPosts = posts.filter((p) => p.status === "posted");
@@ -111,6 +114,20 @@ export default function GrowthDashboard({
     setEditingId(null);
     setEditMetrics({});
     onUpdatePostMetrics?.(postId, editMetrics);
+  }
+
+  async function handleSyncStats() {
+    if (!onSyncLinkedInStats) return;
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const count = await onSyncLinkedInStats();
+      setSyncResult({ count: count || 0, timestamp: new Date().toLocaleTimeString() });
+    } catch {
+      setSyncResult({ count: 0, error: true, timestamp: new Date().toLocaleTimeString() });
+    } finally {
+      setSyncing(false);
+    }
   }
 
   const TABS = [
@@ -226,6 +243,34 @@ export default function GrowthDashboard({
           {/* ANALYTICS TAB */}
           {tab === "analytics" && (
             <>
+              {/* LinkedIn Stats Sync */}
+              <div className="flex items-center justify-between bg-linkedin/5 border border-linkedin/20 rounded-xl p-3">
+                <div>
+                  <p className="text-xs font-semibold text-gray-800 flex items-center gap-1.5">
+                    <TrendingUp size={12} className="text-linkedin" /> Auto-sync from LinkedIn
+                  </p>
+                  <p className="text-[10px] text-gray-500 mt-0.5">
+                    Pulls reactions &amp; comments for posts with a LinkedIn post ID.
+                    {syncResult && !syncResult.error && (
+                      <span className="text-green-600 ml-1">
+                        ✓ Synced {syncResult.count} post{syncResult.count !== 1 ? "s" : ""} at {syncResult.timestamp}
+                      </span>
+                    )}
+                    {syncResult?.error && (
+                      <span className="text-red-500 ml-1">Sync failed — check LinkedIn connection.</span>
+                    )}
+                  </p>
+                </div>
+                <button
+                  onClick={handleSyncStats}
+                  disabled={syncing || !onSyncLinkedInStats}
+                  className="text-xs text-linkedin border border-linkedin/30 px-3 py-1.5 rounded-full hover:bg-linkedin/10 disabled:opacity-40 flex items-center gap-1.5 shrink-0 transition"
+                >
+                  <RefreshCw size={11} className={syncing ? "animate-spin" : ""} />
+                  {syncing ? "Syncing…" : "Sync Now"}
+                </button>
+              </div>
+
               {isDemoData && (
                 <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-3 text-xs flex items-start gap-2 mb-1">
                   <span className="text-base mt-0.5">💡</span>
