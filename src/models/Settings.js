@@ -8,6 +8,7 @@ const SettingsSchema = new mongoose.Schema(
     reminderEnabled: { type: Boolean, default: true },
     pushEnabled: { type: Boolean, default: false },
     topics: { type: mongoose.Schema.Types.Mixed, default: {} },
+    visibleTools: { type: mongoose.Schema.Types.Mixed, default: {} }, // Tool visibility map
     emailsSentCount: { type: Number, default: 0 },
     lastReminderSent: { type: String, default: "" },  // YYYY-MM-DD (IST) — dedupes the daily cron
     lastStreakAlertSent: { type: String, default: "" }, // YYYY-MM-DD (IST) — dedupes streak alert cron

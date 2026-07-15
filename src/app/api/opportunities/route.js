@@ -37,7 +37,7 @@ export async function POST(request) {
     const opportunity = await Opportunity.findOneAndUpdate(
       { oppId: body.oppId, userId: user._id },
       { $set: body },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     return NextResponse.json({ success: true, opportunity });

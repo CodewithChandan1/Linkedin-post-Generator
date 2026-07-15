@@ -74,6 +74,17 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
     setDraft((d) => ({ ...d, topics: { ...d.topics, [topic]: !d.topics[topic] } }));
   }
 
+  function toggleTool(toolId) {
+    setDraft((d) => {
+      const current = d.visibleTools || {};
+      const nextVal = current[toolId] === false ? true : false;
+      return {
+        ...d,
+        visibleTools: { ...current, [toolId]: nextVal }
+      };
+    });
+  }
+
   function handleSave() {
     onSave(draft);
     onClose();
@@ -323,6 +334,44 @@ export default function SettingsModal({ open, onClose, settings, onSave, todaysP
                   {topic}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Show/Hide Tools control */}
+          <div className="border-t border-gray-100 pt-4">
+            <p className="text-sm font-medium text-gray-700 mb-1">Show/Hide Tools in Sidebar</p>
+            <p className="text-[11px] text-gray-500 mb-3">Choose which developer tools appear in your side nav menu.</p>
+            <div className="space-y-2.5">
+              {[
+                { id: "presentation_generator", label: "Presentation Generator" },
+                { id: "profile_seo_auditor", label: "Profile SEO Auditor" },
+                { id: "opportunity_tracker", label: "Opportunity Tracker" },
+                { id: "growth_dashboard", label: "Growth Dashboard" },
+                { id: "content_calendar", label: "Content Calendar" },
+                { id: "newsletter_generator", label: "Newsletter Generator" },
+                { id: "strategic_comments", label: "Strategic Comments" },
+                { id: "profile_visitor_tracker", label: "Profile Visitor Tracker" },
+                { id: "project_docs", label: "Project Docs" }
+              ].map((tool) => {
+                const isVisible = draft.visibleTools?.[tool.id] !== false;
+                return (
+                  <div key={tool.id} className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600 font-medium">{tool.label}</span>
+                    <button
+                      role="switch"
+                      aria-checked={isVisible}
+                      onClick={() => toggleTool(tool.id)}
+                      className={`w-9 h-5 rounded-full transition relative ${isVisible ? "bg-linkedin" : "bg-gray-300"}`}
+                    >
+                      <span
+                        className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${
+                          isVisible ? "left-[18px]" : "left-0.5"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

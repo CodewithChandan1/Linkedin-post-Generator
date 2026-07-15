@@ -2,7 +2,8 @@
 // LinkedIn Newsletter Auto-Generator — PRD §6.4
 
 import { useState } from "react";
-import { Newspaper, CalendarDays, Megaphone, ClipboardList } from "lucide-react";
+import { Newspaper, CalendarDays, Megaphone, ClipboardList, Check, Copy, HelpCircle } from "lucide-react";
+
 export default function NewsletterGenerator({ posts, onClose }) {
   const [loading, setLoading] = useState(false);
   const [newsletter, setNewsletter] = useState(null);
@@ -49,145 +50,196 @@ export default function NewsletterGenerator({ posts, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white">
-          <div>
-            <h2 className="font-semibold text-gray-900 flex items-center gap-1.5"><Newspaper size={16} /> Newsletter Generator</h2>
-            <p className="text-xs text-gray-500 mt-0.5">25-35% open rate vs 2% feed reach — bypasses algorithm</p>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-[3px] z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-[28px] w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-200">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-gray-50/50 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-linkedin/10 text-linkedin rounded-xl flex items-center justify-center border border-linkedin/10">
+              <Newspaper size={16} />
+            </div>
+            <div>
+              <h2 className="font-bold text-gray-900 text-base">Newsletter Generator</h2>
+              <p className="text-[11px] text-gray-400 mt-0.5">Bypasses the LinkedIn feed algorithm entirely</p>
+            </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+          <button 
+            onClick={onClose} 
+            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors text-2xl leading-none"
+          >
+            ×
+          </button>
         </div>
 
-        <div className="p-4 space-y-4">
+        {/* Scrollable Body */}
+        <div className="overflow-y-auto flex-1 p-6 md:p-8 space-y-6">
           {!newsletter ? (
             <>
               {/* Featured post selector */}
-              <div>
-                <p className="text-xs font-semibold text-gray-700 mb-2">Featured post this week</p>
+              <div className="space-y-3">
+                <p className="text-xs font-bold text-gray-700">Select Featured Post for this Edition</p>
                 {weekPosts.length === 0 && (
-                  <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2.5">
-                    No posts this week yet — will use your most recent post instead.
+                  <p className="text-xs text-amber-700 bg-amber-50/60 border border-amber-100 rounded-xl px-4 py-3 leading-relaxed">
+                    No posts published this week yet. We'll use your most recent published post instead.
                   </p>
                 )}
-                <div className="space-y-2 max-h-40 overflow-y-auto">
+                <div className="space-y-2 max-h-48 overflow-y-auto">
                   {(weekPosts.length > 0 ? weekPosts : posts.filter((p) => p.status === "posted").slice(0, 3)).map((p) => (
                     <button
                       key={p.id}
                       onClick={() => setSelectedPost(p)}
-                      className={`w-full text-left rounded-lg border px-3 py-2 text-xs transition ${
+                      className={`w-full text-left rounded-xl border p-3 text-xs transition active:scale-[0.99] ${
                         (selectedPost?.id || bestPost?.id) === p.id
-                          ? "border-linkedin bg-linkedin/10"
-                          : "border-gray-200 hover:bg-gray-50"
+                          ? "border-linkedin bg-linkedin/10 text-linkedin font-semibold"
+                          : "border-gray-200 text-gray-700 hover:bg-gray-50"
                       }`}
                     >
-                      <p className="font-medium text-gray-800">{p.topic}</p>
-                      <p className="text-gray-500 mt-0.5 line-clamp-1">{p.content.slice(0, 80)}…</p>
-                      <p className="text-gray-400 mt-0.5">{p.date}</p>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold">{p.topic}</span>
+                        <span className="text-[9px] text-gray-400 font-semibold">{p.date}</span>
+                      </div>
+                      <p className="text-gray-500 line-clamp-1 leading-relaxed">{p.content.slice(0, 90)}…</p>
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800 space-y-1">
-                <p className="font-medium">Why newsletters win:</p>
-                <p>• Delivered directly to subscriber inbox + push notification</p>
-                <p>• 25-35% open rate vs 2% feed reach</p>
-                <p>• LinkedIn invites ALL your connections to subscribe on first publish</p>
-                <p>• Bypasses the feed algorithm entirely</p>
+              {/* Informative Why Newsletters Win Card */}
+              <div className="bg-blue-50/30 border border-blue-100 rounded-2xl p-5 text-xs text-blue-800 space-y-2.5">
+                <p className="font-extrabold uppercase tracking-wider text-[10px] text-blue-900">Why newsletters win:</p>
+                <div className="space-y-1.5 leading-relaxed">
+                  <p>• Delivered directly to subscriber inboxes and via mobile push notifications.</p>
+                  <p>• <strong>25-35% open rates</strong> vs 2% average organic feed reach.</p>
+                  <p>• LinkedIn invites all of your connections to subscribe on your first newsletter publish.</p>
+                </div>
               </div>
 
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p className="text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-xl px-4 py-2.5">{error}</p>}
 
-              <button
-                onClick={generate}
-                disabled={loading || !bestPost}
-                className="w-full bg-linkedin hover:bg-linkedin-hover text-white font-medium py-2.5 rounded-full text-sm disabled:opacity-50"
-              >
-                {loading ? "Writing newsletter…" : "Generate Newsletter Edition"}
-              </button>
+              {/* Tooltip Wrapper for Button */}
+              <div className="relative group">
+                <button
+                  onClick={generate}
+                  disabled={loading || !bestPost}
+                  className="w-full bg-linkedin hover:bg-linkedin-hover text-white font-bold py-3 rounded-full text-xs disabled:opacity-50 transition shadow-sm hover:shadow active:scale-[0.99] flex items-center justify-center gap-1.5"
+                >
+                  {loading ? "Writing newsletter…" : "Generate Newsletter Edition"}
+                </button>
+                
+                {!bestPost && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 hidden group-hover:flex flex-col items-center bg-gray-900 text-white text-[11px] font-semibold px-3.5 py-2.5 rounded-xl w-72 text-center shadow-2xl pointer-events-none z-30 animate-in fade-in slide-in-from-bottom-2 duration-150">
+                    <span className="flex items-center gap-1 text-amber-400 mb-0.5"><HelpCircle size={12} /> Button Locked</span>
+                    <span className="font-medium text-gray-300 leading-normal">Please publish at least one post on LinkedIn to generate a newsletter.</span>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-6 border-transparent border-t-gray-900"></div>
+                  </div>
+                )}
+              </div>
             </>
           ) : (
             <>
               {/* Newsletter preview */}
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-gray-900">Newsletter ready!</p>
+                <p className="text-sm font-bold text-gray-900">Newsletter ready!</p>
                 <button
                   onClick={() => copy(buildFullNewsletter(), "full")}
-                  className="text-xs text-linkedin border border-linkedin/30 px-3 py-1 rounded-full hover:bg-linkedin/10"
+                  className={`text-[10px] font-bold px-3.5 py-1.5 rounded-full border transition-all flex items-center gap-1 ${
+                    copied === "full"
+                      ? "bg-linkedin text-white border-linkedin"
+                      : "bg-white text-linkedin border-linkedin/30 hover:bg-linkedin/5"
+                  }`}
                 >
-                  {copied === "full" ? "✓ Copied!" : "Copy full newsletter"}
+                  {copied === "full" ? <Check size={11} /> : null}
+                  {copied === "full" ? "Copied!" : "Copy Full Newsletter"}
                 </button>
               </div>
 
               {/* Title & Subject */}
-              <div className="bg-linkedin/5 border border-linkedin/20 rounded-xl p-4 space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="text-[10px] text-gray-500 uppercase font-medium">Title</p>
+              <div className="bg-linkedin/5 border border-linkedin/20 rounded-2xl p-4.5 space-y-3.5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-0.5">
+                    <p className="text-[9px] text-gray-400 uppercase tracking-wider font-extrabold">Title</p>
                     <p className="text-base font-bold text-gray-900">{newsletter.title}</p>
                   </div>
-                  <button onClick={() => copy(newsletter.title, "title")} className="text-[10px] text-linkedin shrink-0 border border-linkedin/30 px-2 py-0.5 rounded-full">
-                    {copied === "title" ? "✓" : "Copy"}
+                  <button 
+                    onClick={() => copy(newsletter.title, "title")} 
+                    className="text-[10px] font-semibold text-linkedin shrink-0 border border-linkedin/20 hover:bg-linkedin/5 px-2.5 py-1 rounded-full transition-all"
+                  >
+                    {copied === "title" ? "✓ Copied" : "Copy"}
                   </button>
                 </div>
-                <div>
-                  <p className="text-[10px] text-gray-500 uppercase font-medium">Subject line</p>
-                  <p className="text-sm text-gray-700">{newsletter.subject}</p>
+                <div className="border-t border-linkedin/10 pt-3">
+                  <p className="text-[9px] text-gray-400 uppercase tracking-wider font-extrabold">Subject line</p>
+                  <p className="text-xs text-gray-700 leading-relaxed font-semibold">{newsletter.subject}</p>
                 </div>
               </div>
 
               {/* Sections */}
               {[
-                { key: "intro", label: "Intro", content: newsletter.intro },
-                { key: "main", label: "Main section", content: newsletter.mainSection },
+                { key: "intro", label: "Introductory Paragraph", content: newsletter.intro },
+                { key: "main", label: "Main Body Analysis", content: newsletter.mainSection },
               ].map(({ key, label, content }) => (
-                <div key={key} className="border border-gray-200 rounded-xl p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-semibold text-gray-700">{label}</p>
-                    <button onClick={() => copy(content, key)} className="text-[10px] text-linkedin border border-linkedin/30 px-2 py-0.5 rounded-full">
-                      {copied === key ? "✓" : "Copy"}
+                <div key={key} className="border border-gray-200/80 bg-white rounded-2xl shadow-sm overflow-hidden">
+                  <div className="flex items-center justify-between px-4.5 py-3 bg-gray-50/50 border-b border-gray-100">
+                    <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">{label}</span>
+                    <button 
+                      onClick={() => copy(content, key)} 
+                      className="text-[10px] font-semibold text-linkedin border border-linkedin/20 hover:bg-linkedin/5 px-2.5 py-1 rounded-full transition-all"
+                    >
+                      {copied === key ? "✓ Copied" : "Copy Section"}
                     </button>
                   </div>
-                  <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-wrap">{content}</p>
+                  <div className="p-4.5">
+                    <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-medium">{content}</p>
+                  </div>
                 </div>
               ))}
 
               {/* Insights */}
-              <div className="border border-gray-200 rounded-xl p-3">
-                <p className="text-xs font-semibold text-gray-700 mb-2">Additional insights</p>
-                <ul className="space-y-1.5">
+              <div className="border border-gray-200/80 rounded-2xl p-5 shadow-sm space-y-3">
+                <p className="text-xs font-bold text-gray-800">Additional Bullet Insights</p>
+                <ul className="space-y-2.5">
                   {newsletter.additionalInsights.map((ins, i) => (
-                    <li key={i} className="text-xs text-gray-600 flex gap-2">
-                      <span className="text-linkedin shrink-0">•</span>{ins}
+                    <li key={i} className="text-xs text-gray-600 flex gap-2 items-start leading-relaxed font-medium">
+                      <span className="text-linkedin font-black mt-0.5">•</span>
+                      <span>{ins}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
               {/* What's next + CTA */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="border border-gray-200 rounded-xl p-3">
-                  <p className="text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1"><CalendarDays size={12} /> Next week teaser</p>
-                  <p className="text-xs text-gray-600">{newsletter.whatsNext}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="border border-gray-200/80 rounded-2xl p-4.5 shadow-sm space-y-2">
+                  <p className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                    <CalendarDays size={13} className="text-linkedin" /> Next Week Teaser
+                  </p>
+                  <p className="text-xs text-gray-600 leading-relaxed font-medium">{newsletter.whatsNext}</p>
                 </div>
-                <div className="border border-gray-200 rounded-xl p-3">
-                  <p className="text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1"><Megaphone size={12} /> CTA</p>
-                  <p className="text-xs text-gray-600">{newsletter.cta}</p>
+                <div className="border border-gray-200/80 rounded-2xl p-4.5 shadow-sm space-y-2">
+                  <p className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                    <Megaphone size={13} className="text-orange-500" /> Call to Action (CTA)
+                  </p>
+                  <p className="text-xs text-gray-600 leading-relaxed font-medium">{newsletter.cta}</p>
                 </div>
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
-                <p className="font-medium mb-1 flex items-center gap-1"><ClipboardList size={12} /> How to publish:</p>
-                <p>1. Go to LinkedIn → Write article / Newsletter</p>
-                <p>2. Create newsletter on first time (auto-invites all connections)</p>
-                <p>3. Paste each section, add your header image</p>
-                <p>4. Publish every Sunday for maximum traction</p>
+              {/* Step-by-step instructions */}
+              <div className="bg-amber-50/20 border border-amber-100 rounded-2xl p-5 space-y-2.5">
+                <p className="font-bold text-amber-800 text-xs flex items-center gap-1.5">
+                  <ClipboardList size={13} /> How to Publish on LinkedIn:
+                </p>
+                <div className="space-y-1.5 text-xs text-amber-900 leading-relaxed">
+                  <p>1. Go to LinkedIn feed &rarr; Click <strong>Write article</strong>.</p>
+                  <p>2. Select <strong>Create newsletter</strong> if it's your first time (auto-invites connections).</p>
+                  <p>3. Copy each section from above and paste them, then add a neat header cover image.</p>
+                  <p>4. Publish consistently (e.g. every Sunday morning) for maximum open rates.</p>
+                </div>
               </div>
 
               <button
                 onClick={() => setNewsletter(null)}
-                className="w-full border border-gray-200 text-gray-600 text-sm py-2 rounded-full hover:bg-gray-50"
+                className="w-full border border-gray-200 text-gray-600 font-semibold text-xs py-3 rounded-full hover:bg-gray-50 hover:text-gray-800 transition active:scale-[0.99] mt-2"
               >
                 Regenerate
               </button>

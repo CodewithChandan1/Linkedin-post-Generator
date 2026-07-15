@@ -3,7 +3,7 @@
 // Uses html2canvas + jsPDF to build a branded 1080×1350px PDF carousel
 
 import { useState, useRef } from "react";
-import { FileText, CheckCircle, ClipboardList, Download } from "lucide-react";
+import { FileText, CheckCircle, ClipboardList, Download, ArrowLeft, Info, HelpCircle } from "lucide-react";
 
 const SLIDE_BG_COLORS = [
   "#0A66C2", // LinkedIn blue — cover
@@ -19,6 +19,7 @@ export default function CarouselGenerator({ post, profile, onClose }) {
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState("");
   const [step, setStep] = useState("input"); // input | preview | done
+  const [copied, setCopied] = useState(false);
   const previewRef = useRef(null);
 
   async function generateCarousel() {
@@ -70,7 +71,6 @@ export default function CarouselGenerator({ post, profile, onClose }) {
   async function downloadPDF() {
     setDownloading(true);
     try {
-      // Dynamic import — only loads in browser
       const html2canvas = (await import("html2canvas")).default;
       const { jsPDF } = await import("jspdf");
 
@@ -108,56 +108,72 @@ export default function CarouselGenerator({ post, profile, onClose }) {
   async function copyCaption() {
     const full = `${linkedInCaption}\n\n${hashtags.join(" ")}`;
     await navigator.clipboard.writeText(full).catch(() => { });
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-[3px] z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-[28px] w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-200">
+        
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <div>
-            <h2 className="font-semibold text-gray-900 flex items-center gap-1.5"><FileText size={16} /> PDF Carousel Generator</h2>
-            <p className="text-xs text-gray-500 mt-0.5">6.6% avg engagement — 3× higher than text posts</p>
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-gray-50/50 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-linkedin/10 text-linkedin rounded-xl flex items-center justify-center border border-linkedin/10">
+              <FileText size={16} />
+            </div>
+            <div>
+              <h2 className="font-bold text-gray-900 text-base">PDF Carousel Generator</h2>
+              <p className="text-[11px] text-gray-400 mt-0.5">High-impact document sliders for professional branding</p>
+            </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+          <button 
+            onClick={onClose} 
+            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors text-2xl leading-none"
+          >
+            ×
+          </button>
         </div>
 
-        <div className="p-4 space-y-4">
+        {/* Scrollable Body */}
+        <div className="overflow-y-auto flex-1 p-6 md:p-8 space-y-6">
+          
           {/* Step 1: Input */}
           {step === "input" && (
             <>
-              <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">
-                  Carousel topic
+              <div className="space-y-2.5">
+                <label className="text-xs font-bold text-gray-700 block">
+                  Carousel Topic / Hook Title
                 </label>
                 <input
                   type="text"
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   placeholder="e.g. '5 React patterns that cut my re-renders by 50%'"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-linkedin/30 focus:border-linkedin"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-linkedin/30 transition placeholder-gray-400"
                 />
-                <p className="text-xs text-gray-400 mt-1">
-                  Leave blank to convert today's post into a carousel
+                <p className="text-[10px] text-gray-400 font-semibold px-0.5">
+                  * Leave blank to automatically convert today's generated post into a carousel format.
                 </p>
               </div>
 
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p className="text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-xl px-4 py-2.5">{error}</p>}
 
               <button
                 onClick={generateCarousel}
                 disabled={loading}
-                className="w-full bg-linkedin hover:bg-linkedin-hover text-white font-medium py-2.5 rounded-full text-sm disabled:opacity-50 transition"
+                className="w-full bg-linkedin hover:bg-linkedin-hover text-white font-bold py-3 rounded-full text-xs disabled:opacity-50 transition shadow-sm hover:shadow active:scale-[0.99]"
               >
-                {loading ? "Generating slides…" : "Generate Carousel"}
+                {loading ? "Generating slides outline…" : "Generate Carousel Slides"}
               </button>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800 space-y-1">
-                <p className="font-medium">Why PDF carousels work:</p>
-                <p>• 6.6% avg engagement vs 2% text posts</p>
-                <p>• Up to 40% engagement in tech niches</p>
-                <p>• 4× dwell time — LinkedIn's Depth Score loves it</p>
-                <p>• 8–12% follower reach (vs 2% for plain text)</p>
+              <div className="bg-blue-50/30 border border-blue-100 rounded-2xl p-5 text-xs text-blue-800 space-y-2.5">
+                <p className="font-extrabold uppercase tracking-wider text-[10px] text-blue-900">Why PDF carousels work:</p>
+                <div className="space-y-1.5 leading-relaxed">
+                  <p>• <strong>6.6% average engagement</strong> vs 2% standard text-only posts.</p>
+                  <p>• Boosts dwell time significantly, which signals LinkedIn's algorithm to promote your post.</p>
+                  <p>• Easy to read and highly bookmarkable for developers.</p>
+                </div>
               </div>
             </>
           )}
@@ -165,14 +181,16 @@ export default function CarouselGenerator({ post, profile, onClose }) {
           {/* Step 2: Preview */}
           {step === "preview" && slides && (
             <>
-              <p className="text-sm text-gray-600">
-                {slides.length} slides generated — review below, then download PDF
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-bold text-gray-700">
+                  {slides.length} Slides Generated — Review & Export
+                </p>
+              </div>
 
               {/* Slide preview grid */}
               <div
                 ref={previewRef}
-                className="grid grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-1"
+                className="grid grid-cols-2 gap-3.5 max-h-[360px] overflow-y-auto pr-1 bg-gray-50/50 p-5 rounded-2xl border border-gray-100"
               >
                 {slides.map((slide, i) => (
                   <SlidePreview key={i} slide={slide} index={i} total={slides.length} profileName={profile?.name} />
@@ -180,67 +198,75 @@ export default function CarouselGenerator({ post, profile, onClose }) {
               </div>
 
               {/* Caption */}
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-xs font-medium text-gray-700">LinkedIn caption</p>
+              <div className="bg-white rounded-2xl p-5 border border-gray-200/80 shadow-sm space-y-2.5">
+                <div className="flex items-center justify-between pb-2.5 border-b border-gray-50">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wider font-extrabold">LinkedIn Caption text</p>
                   <button
                     onClick={copyCaption}
-                    className="text-xs text-linkedin hover:underline"
+                    className="text-[10px] font-bold text-linkedin border border-linkedin/20 hover:bg-linkedin/5 px-2.5 py-1 rounded-full transition-all"
                   >
-                    Copy caption
+                    {copied ? "✓ Copied" : "Copy Caption"}
                   </button>
                 </div>
-                <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-wrap">
+                <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-medium">
                   {linkedInCaption}
                 </p>
-                <p className="text-xs text-linkedin mt-1">{hashtags.join(" ")}</p>
+                <p className="text-[11px] text-linkedin font-bold tracking-tight">{hashtags.join(" ")}</p>
               </div>
 
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p className="text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-xl px-4 py-2.5">{error}</p>}
 
-              <div className="flex gap-2">
+              <div className="flex gap-3 pt-2">
                 <button
                   onClick={() => setStep("input")}
-                  className="flex-1 border border-gray-200 text-gray-700 text-sm py-2.5 rounded-full hover:bg-gray-50"
+                  className="flex-1 border border-gray-200 text-gray-600 font-bold text-xs py-3 rounded-full hover:bg-gray-50 transition active:scale-[0.99] flex items-center justify-center gap-1"
                 >
-                  ← Regenerate
+                  <ArrowLeft size={13} /> Back to Edit
                 </button>
                 <button
                   onClick={downloadPDF}
                   disabled={downloading}
-                  className="flex-2 bg-linkedin hover:bg-linkedin-hover text-white text-sm font-medium py-2.5 px-6 rounded-full disabled:opacity-50 transition"
+                  className="flex-[2] bg-linkedin hover:bg-linkedin-hover text-white font-bold py-3 px-6 rounded-full text-xs disabled:opacity-50 transition shadow-sm hover:shadow active:scale-[0.99] flex items-center justify-center gap-1.5"
                 >
-                  {downloading ? "Building PDF…" : <><Download size={13} className="inline mr-1" />Download PDF</>}
+                  {downloading ? "Building PDF file…" : <><Download size={13} /> Download PDF Document</>}
                 </button>
               </div>
 
-              <p className="text-xs text-gray-400 text-center">
-                Upload the PDF to LinkedIn as a "Document" post for maximum reach
-              </p>
+              <div className="bg-amber-50/20 border border-amber-100 rounded-2xl p-4 text-[11px] text-amber-800 flex items-start gap-2">
+                <Info size={13} className="shrink-0 mt-0.5" />
+                <span>Upload this PDF to LinkedIn as a "Document" format. LinkedIn rewards document posts with 3x higher organic reach.</span>
+              </div>
             </>
           )}
 
           {/* Step 3: Done */}
           {step === "done" && (
-            <div className="text-center py-6">
-              <CheckCircle size={48} className="mx-auto text-green-500 mb-3" />
-              <h3 className="font-semibold text-gray-900 text-lg mb-1">PDF downloaded!</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Upload it to LinkedIn as a "Document" post and paste the caption.
-                Carousels are the highest-engagement format on LinkedIn in 2026.
-              </p>
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800 text-left mb-4">
-                <p className="font-medium mb-1 flex items-center gap-1"><ClipboardList size={12} /> How to upload:</p>
-                <p>1. Go to LinkedIn → Start a post</p>
-                <p>2. Click the document icon → upload your PDF</p>
-                <p>3. Paste the caption (already copied)</p>
-                <p>4. Post at your best time for maximum reach</p>
+            <div className="text-center py-6 space-y-4">
+              <div className="w-14 h-14 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                <CheckCircle size={28} />
               </div>
+              <div className="space-y-1">
+                <h3 className="font-bold text-gray-900 text-base">PDF Export Success!</h3>
+                <p className="text-xs text-gray-500 leading-normal max-w-md mx-auto">
+                  Your PDF file has been downloaded. Upload it to LinkedIn as a document post and paste the copied caption.
+                </p>
+              </div>
+
+              <div className="bg-amber-50/20 border border-amber-100 rounded-2xl p-5 text-xs text-amber-900 text-left space-y-2.5 max-w-lg mx-auto">
+                <p className="font-bold text-amber-800 flex items-center gap-1.5"><ClipboardList size={13} /> How to Publish on LinkedIn:</p>
+                <div className="space-y-1.5 leading-relaxed">
+                  <p>1. Open LinkedIn and click <strong>Start a post</strong>.</p>
+                  <p>2. Select the <strong>Document icon</strong> and upload the PDF file.</p>
+                  <p>3. Paste the caption text (which has been copied to your clipboard).</p>
+                  <p>4. Publish and watch engagement spike.</p>
+                </div>
+              </div>
+
               <button
                 onClick={onClose}
-                className="bg-linkedin text-white px-6 py-2.5 rounded-full text-sm font-medium"
+                className="bg-linkedin hover:bg-linkedin-hover text-white font-bold px-8 py-3 rounded-full text-xs transition shadow-sm hover:shadow active:scale-[0.99] inline-block"
               >
-                Done
+                Close Generator
               </button>
             </div>
           )}
@@ -266,12 +292,12 @@ function SlidePreview({ slide, index, total, profileName }) {
 
   return (
     <div
-      className="carousel-slide relative rounded-xl overflow-hidden aspect-[4/5] flex flex-col justify-between p-4"
+      className="carousel-slide relative rounded-2xl overflow-hidden aspect-[4/5] flex flex-col justify-between p-5 shadow-sm border"
       style={{
-        minHeight: 160,
+        minHeight: 170,
         background: isCover ? GRADIENTS.cover : isCTA ? GRADIENTS.cta : GRADIENTS.body,
         color: dark ? "#fff" : "#1D2226",
-        border: dark ? "none" : "1px solid #e5e7eb",
+        borderColor: dark ? "transparent" : "#f1f1f1",
       }}
     >
       {/* Decorative shapes */}
@@ -279,24 +305,24 @@ function SlidePreview({ slide, index, total, profileName }) {
         className="absolute rounded-full"
         style={{
           width: 130, height: 130, top: -45, right: -35,
-          background: dark ? "rgba(255,255,255,0.10)" : "rgba(10,102,194,0.08)",
+          background: dark ? "rgba(255,255,255,0.08)" : "rgba(10,102,194,0.06)",
         }}
       />
       <div
         className="absolute rounded-full"
         style={{
           width: 70, height: 70, bottom: 40, left: -25,
-          background: dark ? "rgba(255,255,255,0.06)" : "rgba(10,102,194,0.06)",
+          background: dark ? "rgba(255,255,255,0.05)" : "rgba(10,102,194,0.04)",
         }}
       />
       {!dark && (
-        <div className="absolute left-0 top-0 h-full" style={{ width: 5, background: "#0A66C2" }} />
+        <div className="absolute left-0 top-0 h-full w-[4px]" style={{ background: "#0A66C2" }} />
       )}
 
       {/* Top row: badge + slide counter */}
       <div className="relative flex items-center justify-between z-10">
         <span
-          className="text-[8px] font-bold tracking-wider px-2 py-0.5 rounded-full"
+          className="text-[7.5px] font-bold tracking-wider px-2 py-0.5 rounded-md"
           style={{
             background: dark ? "rgba(255,255,255,0.18)" : "#0A66C2",
             color: "#fff",
@@ -308,24 +334,24 @@ function SlidePreview({ slide, index, total, profileName }) {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex-1 flex flex-col justify-center py-2">
-        <p className={`font-extrabold leading-tight mb-1.5 ${isCover ? "text-base" : "text-sm"}`}>
+      <div className="relative z-10 flex-1 flex flex-col justify-center py-2.5">
+        <p className={`font-extrabold leading-tight mb-2 ${isCover ? "text-sm" : "text-[11px]"}`}>
           {slide.headline}
         </p>
         {/* Accent underline */}
         <div
           className="mb-2 rounded-full"
-          style={{ width: 32, height: 3, background: dark ? "rgba(255,255,255,0.55)" : "#0A66C2" }}
+          style={{ width: 28, height: 3, background: dark ? "rgba(255,255,255,0.5)" : "#0A66C2" }}
         />
         <p
-          className="text-[10.5px] leading-relaxed"
-          style={{ color: dark ? "rgba(255,255,255,0.85)" : "#4b5563" }}
+          className="text-[9.5px] leading-relaxed font-medium"
+          style={{ color: dark ? "rgba(255,255,255,0.8)" : "#4b5563" }}
         >
           {slide.body}
         </p>
         {slide.codeSnippet && (
           <pre
-            className="text-[9px] mt-2 rounded-md px-2 py-1.5 font-mono leading-relaxed overflow-hidden"
+            className="text-[8px] mt-2 rounded-lg px-2 py-1.5 font-mono leading-relaxed overflow-hidden"
             style={{ background: "#0b1220", color: "#4ade80" }}
           >
             {slide.codeSnippet.slice(0, 100)}
@@ -334,18 +360,18 @@ function SlidePreview({ slide, index, total, profileName }) {
       </div>
 
       {/* Branding footer */}
-      <div className="relative z-10 flex items-center gap-1.5">
+      <div className="relative z-10 flex items-center gap-1.5 border-t pt-2" style={{ borderColor: dark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }}>
         <span
-          className="flex items-center justify-center rounded-full text-[7px] font-bold"
+          className="flex items-center justify-center rounded-lg text-[7px] font-black"
           style={{
-            width: 16, height: 16,
+            width: 15, height: 15,
             background: dark ? "#fff" : "#0A66C2",
             color: dark ? "#0A66C2" : "#fff",
           }}
         >
           {initials}
         </span>
-        <span className="text-[9px] font-medium" style={{ color: dark ? "rgba(255,255,255,0.7)" : "#6b7280" }}>
+        <span className="text-[8.5px] font-bold" style={{ color: dark ? "rgba(255,255,255,0.75)" : "#6b7280" }}>
           {profileName || "Developer"}
         </span>
       </div>

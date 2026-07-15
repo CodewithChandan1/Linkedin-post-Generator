@@ -2,7 +2,7 @@
 // Short Video Script Generator — PRD §6.10
 
 import { useState } from "react";
-import { Video, Camera, Lightbulb, Copy, Check } from "lucide-react";
+import { Video, Camera, Lightbulb, Copy, Check, Info, Film, ClipboardList } from "lucide-react";
 
 export default function VideoScriptGenerator({ post, onClose }) {
   const [script, setScript] = useState(null);
@@ -53,87 +53,107 @@ export default function VideoScriptGenerator({ post, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <div>
-            <h2 className="font-semibold text-gray-900 flex items-center gap-1.5"><Video size={16} /> Video Script Generator</h2>
-            <p className="text-xs text-gray-500 mt-0.5">30-60s vertical video — 5x more engagement than text</p>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-[3px] z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-[28px] w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-200">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-gray-50/50 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-linkedin/10 text-linkedin rounded-xl flex items-center justify-center border border-linkedin/10">
+              <Video size={16} />
+            </div>
+            <div>
+              <h2 className="font-bold text-gray-900 text-base">Video Script Generator</h2>
+              <p className="text-[11px] text-gray-400 mt-0.5">Structure raw post text into high-engagement 30-60s vertical video scripts</p>
+            </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+          <button 
+            onClick={onClose} 
+            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors text-2xl leading-none"
+          >
+            ×
+          </button>
         </div>
 
-        <div className="p-4 space-y-4">
+        {/* Scrollable Body */}
+        <div className="overflow-y-auto flex-1 p-6 md:p-8 space-y-6">
           {!script ? (
             <>
               {post && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                  <p className="text-xs font-medium text-gray-700 mb-1">Converting post:</p>
-                  <p className="text-xs text-gray-600 line-clamp-2">{post.content?.slice(0, 120)}…</p>
+                <div className="bg-white border border-gray-200/80 rounded-2xl p-4.5 shadow-sm space-y-2">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Converting Post Content</p>
+                  <p className="text-xs text-gray-600 leading-relaxed line-clamp-3 font-medium italic">"{post.content}"</p>
                 </div>
               )}
 
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-xs text-orange-800 space-y-1">
-                <p className="font-medium">LinkedIn video stats (2026):</p>
-                <p>• 5× more engagement than text posts</p>
-                <p>• Growing 2× faster than all other formats</p>
-                <p>• LinkedIn Live = 7× reactions, 24× comments vs pre-recorded</p>
-                <p>• Vertical 9:16, captions mandatory (80% watch without sound)</p>
+              <div className="bg-orange-50/20 border border-orange-100 rounded-2xl p-5 text-xs text-orange-850 space-y-2.5">
+                <p className="font-extrabold uppercase tracking-wider text-[10px] text-orange-900">LinkedIn video stats (2026):</p>
+                <div className="space-y-1.5 leading-relaxed font-semibold">
+                  <p>• Vertical 9:16 reels capture <strong>5x more engagement</strong> than raw text posts.</p>
+                  <p>• Fast-paced hook and captions are mandatory (80% of users watch without sound).</p>
+                  <p>• Generates visual screen directions, audio narrative, and production director tips.</p>
+                </div>
               </div>
 
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p className="text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-xl px-4 py-2.5">{error}</p>}
 
               <button
                 onClick={generate}
                 disabled={loading}
-                className="w-full bg-linkedin hover:bg-linkedin-hover text-white font-medium py-2.5 rounded-full text-sm disabled:opacity-50"
+                className="w-full bg-linkedin hover:bg-linkedin-hover text-white font-bold py-3 rounded-full text-xs disabled:opacity-50 transition shadow-sm hover:shadow active:scale-[0.99]"
               >
-                {loading ? "Writing script…" : "Generate Video Script"}
+                {loading ? "Writing script directions…" : "Generate Video Script"}
               </button>
             </>
           ) : (
             <>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between pb-1">
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">Script ready — {script.duration}</p>
-                  <p className="text-xs text-gray-500">Hook: "{script.hook}"</p>
+                  <p className="text-xs font-bold text-gray-700">Script Ready &bull; Duration {script.duration}</p>
+                  <p className="text-[10px] text-gray-400 font-semibold mt-0.5">Hook: "{script.hook}"</p>
                 </div>
                 <button
                   onClick={() => copy(buildFullScript(), "full")}
-                  className="text-xs text-linkedin border border-linkedin/30 px-3 py-1 rounded-full hover:bg-linkedin/10 flex items-center gap-1"
+                  className={`text-[10px] font-bold px-3.5 py-1.5 rounded-full border transition-all flex items-center gap-1 ${
+                    copied === "full"
+                      ? "bg-linkedin text-white border-linkedin"
+                      : "bg-white text-linkedin border-linkedin/30 hover:bg-linkedin/5"
+                  }`}
                 >
-                  {copied === "full" ? <><Check size={11} /> Copied</> : <><Copy size={11} /> Copy all</>}
+                  {copied === "full" ? <Check size={11} /> : null}
+                  {copied === "full" ? "Copied Full Script" : "Copy Full Script"}
                 </button>
               </div>
 
               {/* Scenes */}
-              <div className="space-y-2">
+              <div className="space-y-3.5">
                 {script.scenes.map((scene, i) => (
-                  <div key={i} className="border border-gray-200 rounded-xl p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-mono bg-gray-900 text-green-400 px-2 py-0.5 rounded">
+                  <div key={i} className="border border-gray-200/80 bg-white rounded-2xl overflow-hidden shadow-sm">
+                    <div className="flex items-center justify-between px-4.5 py-2.5 bg-gray-50/50 border-b border-gray-100">
+                      <span className="text-[9px] font-mono bg-gray-900 text-green-400 px-2 py-0.5 rounded font-extrabold uppercase tracking-wide">
                         {scene.timeCode}
                       </span>
                       <button
                         onClick={() => copy(scene.spokenText, `scene-${i}`)}
-                        className="text-[10px] text-linkedin border border-linkedin/30 px-2 py-0.5 rounded-full flex items-center gap-0.5"
+                        className="text-[10px] font-bold text-linkedin border border-linkedin/20 hover:bg-linkedin/5 px-2.5 py-1 rounded-full transition-all"
                       >
-                        {copied === `scene-${i}` ? <><Check size={10} /> Done</> : <><Copy size={10} /> Copy</>}
+                        {copied === `scene-${i}` ? "✓ Copied" : "Copy Speak Text"}
                       </button>
                     </div>
-                    <div className="space-y-1.5">
+                    <div className="p-4.5 space-y-3">
                       <div>
-                        <p className="text-[10px] text-gray-400 uppercase font-medium mb-0.5">Speak</p>
-                        <p className="text-sm text-gray-800 font-medium leading-snug">"{scene.spokenText}"</p>
+                        <p className="text-[9px] text-gray-400 uppercase tracking-wider font-extrabold mb-1">Speak</p>
+                        <p className="text-xs text-gray-800 font-bold leading-relaxed">"{scene.spokenText}"</p>
                       </div>
-                      <div>
-                        <p className="text-[10px] text-gray-400 uppercase font-medium mb-0.5">Show on screen</p>
-                        <p className="text-xs text-gray-600 italic">{scene.visual}</p>
+                      <div className="border-t border-gray-50 pt-2.5">
+                        <p className="text-[9px] text-gray-400 uppercase tracking-wider font-extrabold mb-1">Show on Screen</p>
+                        <p className="text-xs text-gray-500 font-medium leading-relaxed italic">{scene.visual}</p>
                       </div>
                       {scene.tip && (
-                        <p className="text-[10px] text-amber-700 bg-amber-50 px-2 py-1 rounded flex items-center gap-1">
-                          <Lightbulb size={10} /> {scene.tip}
-                        </p>
+                        <div className="text-[10px] text-amber-800 bg-amber-50/50 border border-amber-100/30 p-2.5 rounded-xl flex items-start gap-1.5 leading-normal font-semibold">
+                          <Lightbulb size={12} className="shrink-0 mt-0.5 text-amber-600" />
+                          <span>{scene.tip}</span>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -141,25 +161,31 @@ export default function VideoScriptGenerator({ post, onClose }) {
               </div>
 
               {/* Caption */}
-              <div className="border border-gray-200 rounded-xl p-3">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-xs font-semibold text-gray-700">LinkedIn caption</p>
-                  <button onClick={() => copy(`${script.caption}\n\n${script.hashtags.join(" ")}`, "caption")} className="text-[10px] text-linkedin border border-linkedin/30 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                    {copied === "caption" ? <><Check size={10} /> Done</> : <><Copy size={10} /> Copy</>}
+              <div className="border border-gray-200/80 rounded-2xl p-4.5 shadow-sm space-y-2.5">
+                <div className="flex items-center justify-between pb-2 border-b border-gray-50">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wider font-extrabold">LinkedIn Caption</p>
+                  <button 
+                    onClick={() => copy(`${script.caption}\n\n${script.hashtags.join(" ")}`, "caption")} 
+                    className="text-[10px] font-bold text-linkedin border border-linkedin/20 hover:bg-linkedin/5 px-2.5 py-1 rounded-full transition-all"
+                  >
+                    {copied === "caption" ? "✓ Copied" : "Copy Caption"}
                   </button>
                 </div>
-                <p className="text-xs text-gray-600 whitespace-pre-wrap">{script.caption}</p>
-                <p className="text-xs text-linkedin mt-1">{script.hashtags.join(" ")}</p>
+                <p className="text-xs text-gray-700 leading-relaxed font-medium whitespace-pre-wrap">{script.caption}</p>
+                <p className="text-[11px] text-linkedin font-bold tracking-tight">{script.hashtags.join(" ")}</p>
               </div>
 
               {/* Production tips */}
               {script.productionTips?.length > 0 && (
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
-                <p className="text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1"><Camera size={12} /> Production tips</p>
-                  <ul className="space-y-1">
+                <div className="bg-gray-50/40 border border-gray-200/60 rounded-2xl p-5 space-y-3">
+                  <p className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                    <Camera size={13} className="text-linkedin" /> Production Director Tips
+                  </p>
+                  <ul className="space-y-2.5">
                     {script.productionTips.map((tip, i) => (
-                      <li key={i} className="text-xs text-gray-600 flex gap-1.5">
-                        <span className="text-linkedin shrink-0">•</span>{tip}
+                      <li key={i} className="text-xs text-gray-600 flex gap-2 items-start leading-relaxed font-medium">
+                        <span className="text-linkedin font-black select-none mt-0.5">•</span>
+                        <span>{tip}</span>
                       </li>
                     ))}
                   </ul>
@@ -168,9 +194,9 @@ export default function VideoScriptGenerator({ post, onClose }) {
 
               <button
                 onClick={() => setScript(null)}
-                className="w-full border border-gray-200 text-gray-600 text-sm py-2 rounded-full hover:bg-gray-50"
+                className="w-full border border-gray-200 text-gray-600 font-semibold text-xs py-3 rounded-full hover:bg-gray-50 hover:text-gray-800 transition active:scale-[0.99] mt-2"
               >
-                Regenerate
+                Regenerate Video Script
               </button>
             </>
           )}

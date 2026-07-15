@@ -37,7 +37,7 @@ export async function POST(request) {
     const visit = await ProfileVisit.findOneAndUpdate(
       { visitId: body.visitId, userId: user._id },
       { $set: body },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     return NextResponse.json({ success: true, visit });

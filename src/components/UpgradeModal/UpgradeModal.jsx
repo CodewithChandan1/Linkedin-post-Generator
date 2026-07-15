@@ -128,8 +128,8 @@ export default function UpgradeModal({ isOpen, onClose, onUpgradeSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[4px] overflow-y-auto font-sans">
-      <div className="w-full max-w-lg bg-white/95 backdrop-blur-xl border border-white rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden my-8 animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-[3px] overflow-y-auto font-sans">
+      <div className="w-full max-w-lg bg-white border border-gray-100 rounded-[28px] p-6 md:p-8 shadow-2xl relative overflow-hidden my-8 animate-in fade-in zoom-in duration-200">
         {/* Glow Effects */}
         <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
@@ -138,9 +138,9 @@ export default function UpgradeModal({ isOpen, onClose, onUpgradeSuccess }) {
         {!success && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all text-xl leading-none"
           >
-            <X size={20} />
+            ×
           </button>
         )}
 

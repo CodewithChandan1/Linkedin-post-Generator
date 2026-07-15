@@ -1,8 +1,8 @@
-import { Settings, TrendingUp, LogOut, Menu, BarChart3 } from "lucide-react";
+import { Settings, TrendingUp, LogOut, Menu, BarChart3, BookOpen } from "lucide-react";
 import PostedInLogo from "@/components/PostedInLogo/PostedInLogo";
 import NotificationBell from "@/components/NotificationBell/NotificationBell";
 
-export default function TopNav({ user, onLogout, onOpenSettings, onToggleTrending, showTrending, onUpgradeClick, onOpenLeftDrawer, onOpenRightDrawer }) {
+export default function TopNav({ user, onLogout, onOpenSettings, onOpenBlogReader, onToggleTrending, showTrending, onUpgradeClick, onOpenLeftDrawer, onOpenRightDrawer }) {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
@@ -16,7 +16,9 @@ export default function TopNav({ user, onLogout, onOpenSettings, onToggleTrendin
           </button>
         )}
 
-        <PostedInLogo size="md" />
+        <div id="nav-logo" className="shrink-0 flex items-center">
+          <PostedInLogo size="md" />
+        </div>
 
         <div className="ml-auto flex items-center gap-2">
           {user && (
@@ -52,13 +54,38 @@ export default function TopNav({ user, onLogout, onOpenSettings, onToggleTrendin
             <TrendingUp size={15} />
             <span className="hidden sm:inline">Trending</span>
           </button>
+          {onOpenBlogReader && (
+            <button
+              id="nav-blogs-btn"
+              onClick={onOpenBlogReader}
+              className="flex items-center gap-1.5 text-sm text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded-full transition"
+              aria-label="Open tech blog reader"
+            >
+              <BookOpen size={15} />
+              <span className="hidden sm:inline">Blogs</span>
+            </button>
+          )}
           <button
+            id="nav-settings-btn"
             onClick={onOpenSettings}
             className="flex items-center gap-1.5 text-sm text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded-full transition"
             aria-label="Open reminder settings"
           >
             <Settings size={15} />
             <span className="hidden sm:inline">Settings</span>
+          </button>
+
+          <button
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                import("@/hooks/useProductTour").then((mod) => mod.startProductTour());
+              }
+            }}
+            className="flex items-center gap-1.5 text-sm text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded-full transition font-semibold"
+            aria-label="Start product tour"
+          >
+            <span>❓</span>
+            <span className="hidden sm:inline">Tour</span>
           </button>
 
           {/* In-app notification bell */}

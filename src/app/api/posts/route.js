@@ -38,7 +38,7 @@ export async function POST(request) {
     const post = await Post.findOneAndUpdate(
       { postId: body.postId, userId: user._id },
       { $set: body },
-      { upsert: true, new: true, runValidators: true }
+      { upsert: true, returnDocument: 'after', runValidators: true }
     );
 
     return NextResponse.json({ success: true, post });

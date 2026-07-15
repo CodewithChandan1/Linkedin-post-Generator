@@ -138,27 +138,37 @@ export default function GrowthDashboard({
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-[3px] z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-[28px] w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
-          <div>
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-              <Trophy size={16} className="text-linkedin" /> Growth Dashboard
-            </h2>
-            <p className="text-xs text-gray-500 mt-0.5">Phase 6 — analytics, evergreen, and growth tools</p>
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-gray-50/50 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-linkedin/10 text-linkedin rounded-xl flex items-center justify-center border border-linkedin/10">
+              <Trophy size={16} />
+            </div>
+            <div>
+              <h2 className="font-bold text-gray-900 text-base">Growth Dashboard</h2>
+              <p className="text-[11px] text-gray-400 mt-0.5">Phase 6 — analytics, evergreen, and growth tools</p>
+            </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+          <button 
+            onClick={onClose} 
+            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors text-2xl leading-none"
+          >
+            ×
+          </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 px-4">
+        <div className="flex gap-2 border-b border-gray-100 px-6 py-2.5 bg-gray-50/20 shrink-0">
           {TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`py-2.5 px-3 text-xs font-medium border-b-2 -mb-px transition whitespace-nowrap flex items-center gap-1.5 ${
-                tab === t.key ? "border-linkedin text-linkedin" : "border-transparent text-gray-500 hover:text-gray-700"
+              className={`py-2 px-4 text-xs font-bold rounded-xl transition-all flex items-center gap-2 ${
+                tab === t.key 
+                  ? "bg-linkedin/10 text-linkedin border border-linkedin/10" 
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-100/50 border border-transparent"
               }`}
             >
               {t.icon}{t.label}
@@ -166,7 +176,7 @@ export default function GrowthDashboard({
           ))}
         </div>
 
-        <div className="p-4 space-y-4">
+        <div className="overflow-y-auto flex-1 p-6 md:p-8 space-y-6">
           {/* OVERVIEW TAB */}
           {tab === "overview" && (
             <>
@@ -217,26 +227,6 @@ export default function GrowthDashboard({
                 </div>
               )}
 
-              {/* Phase 6 Quick Access */}
-              <div>
-                <p className="text-xs font-semibold text-gray-700 mb-2">Phase 6 Tools</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { label: "Newsletter", icon: <Newspaper size={13} />, action: onOpenNewsletterGenerator },
-                    { label: "Strategic Comments", icon: <MessageSquare size={13} />, action: onOpenStrategicComments },
-                    { label: "Profile Visits", icon: <Eye size={13} />, action: onOpenProfileVisitor },
-                    { label: "Content Calendar", icon: <Calendar size={13} />, action: onOpenContentCalendar },
-                  ].map(({ label, icon, action }) => (
-                    <button
-                      key={label}
-                      onClick={() => { action?.(); onClose(); }}
-                      className="text-left text-xs text-gray-700 bg-gray-50 hover:bg-linkedin/10 hover:text-linkedin border border-gray-200 rounded-lg px-3 py-2.5 transition flex items-center gap-2"
-                    >
-                      {icon} {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </>
           )}
 
@@ -310,11 +300,11 @@ export default function GrowthDashboard({
 
               {/* Chart block */}
               {publishedPostsSorted.length > 0 ? (
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 relative">
+                <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm relative">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <p className="text-xs font-semibold text-gray-800">LinkedIn Performance Trend</p>
-                      <p className="text-[10px] text-gray-500 mt-0.5">
+                      <p className="text-xs font-bold text-gray-800">LinkedIn Performance Trend</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">
                         {isDemoData ? "Showing mock growth progression" : "Showing last 10 posted updates"}
                       </p>
                     </div>
@@ -491,27 +481,31 @@ export default function GrowthDashboard({
                     {/* Tooltip Overlay */}
                     {hoveredIndex !== null && publishedPostsSorted[hoveredIndex] && (
                       <div
-                        className="absolute bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg p-2.5 shadow-lg text-[11px] pointer-events-none z-20 transition-all duration-200"
+                        className="absolute bg-white border border-gray-200/80 rounded-2xl p-4 shadow-xl text-xs pointer-events-none z-20 transition-all duration-200 w-64"
                         style={{
-                          left: `${45 + (hoveredIndex * (90 / Math.max(1, publishedPostsSorted.length - 1)))}%`,
+                          left: `${9 + (hoveredIndex * (82 / Math.max(1, publishedPostsSorted.length - 1)))}%`,
                           top: "10px",
-                          transform: hoveredIndex > publishedPostsSorted.length / 2 ? "translateX(-105%)" : "translateX(5%)",
+                          transform: hoveredIndex > (publishedPostsSorted.length - 1) / 2 ? "translateX(-105%)" : "translateX(5%)",
                         }}
                       >
-                        <p className="font-bold text-gray-800 border-b border-gray-100 pb-1 mb-1 flex justify-between gap-4">
-                          <span>📅 {publishedPostsSorted[hoveredIndex].date}</span>
-                          <span className="text-gray-400 capitalize">{publishedPostsSorted[hoveredIndex].topic || "Post"}</span>
-                        </p>
-                        <p className="text-gray-600 line-clamp-2 max-w-[180px] mb-1.5 italic">
+                        <div className="flex items-center justify-between border-b border-gray-100 pb-2 mb-2">
+                          <span className="font-bold text-gray-800">📅 {publishedPostsSorted[hoveredIndex].date}</span>
+                          <span className="text-[9px] font-extrabold text-linkedin bg-linkedin/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            {publishedPostsSorted[hoveredIndex].topic || "Post"}
+                          </span>
+                        </div>
+                        <p className="text-gray-500 italic line-clamp-2 leading-relaxed mb-3">
                           "{publishedPostsSorted[hoveredIndex].content}"
                         </p>
-                        <div className="flex gap-3 font-semibold pt-1 border-t border-gray-50">
-                          <span className="text-linkedin">
-                            👀 Views: {publishedPostsSorted[hoveredIndex].impressions || publishedPostsSorted[hoveredIndex].views || 0}
-                          </span>
-                          <span className="text-orange-600">
-                            🖱️ Clicks: {publishedPostsSorted[hoveredIndex].clicks || 0}
-                          </span>
+                        <div className="flex items-center justify-between pt-2.5 border-t border-gray-100">
+                          <div className="flex items-center gap-1.5 text-linkedin font-bold">
+                            <Eye size={13} className="text-linkedin/80" />
+                            <span>{publishedPostsSorted[hoveredIndex].impressions || publishedPostsSorted[hoveredIndex].views || 0} views</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-orange-600 font-bold">
+                            <Share2 size={13} className="text-orange-500" />
+                            <span>{publishedPostsSorted[hoveredIndex].clicks || 0} clicks</span>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -697,9 +691,11 @@ export default function GrowthDashboard({
 
 function StatBox({ value, suffix = "", label, color = "text-gray-900", bg = "bg-gray-50 border-gray-200" }) {
   return (
-    <div className={`rounded-xl border p-3 text-center ${bg}`}>
-      <p className={`text-2xl font-bold ${color}`}>{value}{suffix}</p>
-      <p className="text-[10px] text-gray-500 leading-tight mt-0.5">{label}</p>
+    <div className={`rounded-2xl border p-5 text-center shadow-sm ${bg} flex flex-col justify-center items-center min-h-[110px] transition-all hover:shadow-md`}>
+      <p className={`text-2xl font-black ${color} tracking-tight`}>{value}{suffix}</p>
+      <p className="text-[9px] sm:text-[10px] font-extrabold text-gray-400 uppercase tracking-wider leading-normal mt-2 text-center max-w-[95%]">
+        {label}
+      </p>
     </div>
   );
 }

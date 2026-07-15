@@ -3,7 +3,7 @@
 // Gemini writes the deck outline → preview → export an editable .pptx with AI images.
 
 import { useState, useRef, useEffect } from "react";
-import { Presentation, Download, CheckCircle, Image as ImageIcon, Sparkles, RefreshCw, AlertTriangle } from "lucide-react";
+import { Presentation, Download, CheckCircle, Image as ImageIcon, Sparkles, RefreshCw, AlertTriangle, ArrowLeft, Info, HelpCircle } from "lucide-react";
 import { THEME_LIST, getTheme, hex } from "@/lib/presentationThemes";
 
 const SLIDE_COUNTS = [4, 6, 8, 10];
@@ -18,15 +18,13 @@ function slideImageUrl(prompt) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// Fetch the image as base64 through our same-origin proxy (/api/slide-image).
-// The server fetches pollinations (no browser CORS limits, no early abort) and
-// caches it, so this works reliably and the result is reused by the .pptx export.
+// Fetch the image as base64 through our proxy.
 async function loadImageAsDataUrl(pollUrl, { tries = 2 } = {}) {
   const proxy = `/api/slide-image?format=dataurl&url=${encodeURIComponent(pollUrl)}`;
   for (let i = 0; i < tries; i++) {
     try {
       const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 120000); // generous — generation is 30-45s
+      const timer = setTimeout(() => ctrl.abort(), 120000);
       const res = await fetch(proxy, { signal: ctrl.signal });
       clearTimeout(timer);
       if (res.ok) {
@@ -41,27 +39,27 @@ async function loadImageAsDataUrl(pollUrl, { tries = 2 } = {}) {
   return null;
 }
 
-// Presentational preview image — reflects the preloaded queue state.
+// Presentational preview image.
 function SlidePreviewImage({ state, theme, onRetry }) {
   const st = state?.status || "pending";
   return (
     <div className="w-2/5 shrink-0 relative" style={{ background: theme.panel }}>
       {st === "ok" && state.dataUrl ? (
-        <img src={state.dataUrl} alt="" className="absolute inset-0 w-full h-full object-cover p-1.5 rounded-lg" />
+        <img src={state.dataUrl} alt="" className="absolute inset-0 w-full h-full object-cover p-1 rounded-xl" />
       ) : (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 p-2 text-center">
           {st === "failed" ? (
             <>
-              <ImageIcon size={18} className="text-gray-500" />
+              <ImageIcon size={16} className="text-gray-400" />
               <button
                 onClick={onRetry}
-                className="text-[10px] bg-white text-gray-800 border border-gray-300 rounded-full px-2 py-0.5 shadow-sm flex items-center gap-1 hover:bg-gray-50"
+                className="text-[9px] font-bold bg-white text-gray-800 border border-gray-200 rounded-full px-2.5 py-1 shadow-sm flex items-center gap-1 hover:bg-gray-50 transition active:scale-95"
               >
-                <RefreshCw size={9} /> Retry
+                <RefreshCw size={8} /> Retry
               </button>
             </>
           ) : (
-            <RefreshCw size={18} className="animate-spin text-gray-500" />
+            <RefreshCw size={16} className="animate-spin text-gray-400" />
           )}
         </div>
       )}
@@ -79,7 +77,6 @@ export default function PresentationGenerator({ post, profile, onClose }) {
   const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
   const [step, setStep] = useState("input"); // input | preview | done
-  // Per-slide image preload state: { status: 'pending'|'loading'|'ok'|'failed'|'skip', dataUrl }
   const [images, setImages] = useState([]);
   const runToken = useRef(0);
 
@@ -89,8 +86,6 @@ export default function PresentationGenerator({ post, profile, onClose }) {
     setImages((prev) => prev.map((im, idx) => (idx === i ? { ...im, ...patch } : im)));
   }
 
-  // Preload all slide images through a small concurrency queue when the preview opens.
-  // The Download button stays disabled until every image is resolved (ok or failed).
   useEffect(() => {
     if (step !== "preview" || !deck) return;
     const slides = deck.slides || [];
@@ -98,43 +93,39 @@ export default function PresentationGenerator({ post, profile, onClose }) {
 
     setImages(slides.map((s) => ({ status: s.imagePrompt ? "pending" : "skip", dataUrl: null })));
 
-    const queue = slides.map((s, i) => ({ s, i })).filter((x) => x.s.imagePrompt);
-    let cursor = 0;
-    const CONCURRENCY = 3;
-
-    async function worker() {
-      while (cursor < queue.length) {
-        const { s, i } = queue[cursor++];
-        if (runToken.current !== myToken) return;
-        patchImage(i, { status: "loading" });
-        const dataUrl = await loadImageAsDataUrl(slideImageUrl(s.imagePrompt));
-        if (runToken.current !== myToken) return;
-        patchImage(i, dataUrl ? { status: "ok", dataUrl } : { status: "failed" });
-      }
-    }
-
-    Array.from({ length: CONCURRENCY }, worker);
-
-    return () => {
-      runToken.current++; // cancel this run if deck changes / unmount
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    slides.forEach((s, i) => {
+      if (!s.imagePrompt) return;
+      patchImage(i, { status: "loading" });
+      const url = slideImageUrl(s.imagePrompt);
+      loadImageAsDataUrl(url)
+        .then((dataUrl) => {
+          if (runToken.current !== myToken) return;
+          if (dataUrl) {
+            patchImage(i, { status: "ok", dataUrl });
+          } else {
+            patchImage(i, { status: "failed" });
+          }
+        });
+    });
   }, [step, deck]);
 
   async function retryImage(i) {
     const s = deck?.slides?.[i];
-    if (!s?.imagePrompt) return;
+    if (!s || !s.imagePrompt) return;
     patchImage(i, { status: "loading" });
-    const dataUrl = await loadImageAsDataUrl(slideImageUrl(s.imagePrompt), { tries: 3 });
-    patchImage(i, dataUrl ? { status: "ok", dataUrl } : { status: "failed" });
+    const url = slideImageUrl(s.imagePrompt);
+    const dataUrl = await loadImageAsDataUrl(url);
+    if (dataUrl) {
+      patchImage(i, { status: "ok", dataUrl });
+    } else {
+      patchImage(i, { status: "failed" });
+    }
   }
 
-  // Derived image-load progress.
-  const activeImages = images.filter((im) => im.status !== "skip");
-  const totalImages = activeImages.length;
-  const resolvedImages = activeImages.filter((im) => im.status === "ok" || im.status === "failed").length;
-  const failedImages = activeImages.filter((im) => im.status === "failed").length;
-  const imagesLoading = activeImages.some((im) => im.status === "pending" || im.status === "loading");
+  const totalImages = images.filter((im) => im.status !== "skip").length;
+  const resolvedImages = images.filter((im) => im.status === "ok" || im.status === "failed").length;
+  const failedImages = images.filter((im) => im.status === "failed").length;
+  const imagesLoading = resolvedImages < totalImages;
 
   async function generate() {
     setLoading(true);
@@ -143,11 +134,22 @@ export default function PresentationGenerator({ post, profile, onClose }) {
       const res = await fetch("/api/presentation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic: topic || post?.topic, numSlides }),
+        body: JSON.stringify({
+          topic,
+          numSlides,
+          content: post?.content,
+        }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Generation failed");
-      setDeck(data);
+      if (!res.ok) throw new Error(data.error || "Generation outline failed");
+
+      const devName = profile?.name || "Developer";
+      setDeck({
+        deckTitle: data.deckTitle || data.title || "Untitled Presentation",
+        subtitle: data.subtitle || "Created with AI",
+        author: devName,
+        slides: data.slides || [],
+      });
       setStep("preview");
     } catch (err) {
       setError(err.message);
@@ -157,46 +159,54 @@ export default function PresentationGenerator({ post, profile, onClose }) {
   }
 
   async function downloadPPTX() {
-    if (!deck) return;
     setDownloading(true);
-    setError("");
+    setProgress("Loading slide generator…");
     try {
       const PptxGenJS = (await import("pptxgenjs")).default;
       const pptx = new PptxGenJS();
-      pptx.defineLayout({ name: "WIDE", width: 13.333, height: 7.5 });
-      pptx.layout = "WIDE";
-      pptx.author = deck.author || "Developer";
-      pptx.title = deck.deckTitle;
+      pptx.layout = "LAYOUT_16x9";
 
-      const W = 13.333;
+      const W = 13.3;
       const H = 7.5;
 
-      // ---- Title slide ----
-      const title = pptx.addSlide();
-      title.background = { color: hex(theme.titleSlideBg) };
-      title.addShape(pptx.ShapeType.rect, {
-        x: 0.8, y: 3.05, w: 1.4, h: 0.12, fill: { color: hex(theme.accent) },
-      });
-      title.addText(deck.deckTitle, {
-        x: 0.8, y: 2.0, w: W - 1.6, h: 1.0, fontSize: 40, bold: true,
-        color: hex(theme.titleSlideText), align: "left", fontFace: "Arial",
-      });
-      if (deck.subtitle) {
-        title.addText(deck.subtitle, {
-          x: 0.8, y: 3.35, w: W - 1.6, h: 0.8, fontSize: 18,
-          color: hex(theme.titleSlideText), align: "left", fontFace: "Arial",
-        });
+      // Title Slide
+      const titleSlide = pptx.addSlide();
+      if (themeKey === "gradient") {
+        titleSlide.background = { color: hex(theme.gradientStart) };
+      } else {
+        titleSlide.background = { color: hex(theme.titleSlideBg) };
       }
-      title.addText(`${deck.author}  ·  ${profile?.headline || "Full Stack Developer"}`, {
-        x: 0.8, y: H - 0.9, w: W - 1.6, h: 0.4, fontSize: 12,
-        color: hex(theme.titleSlideText), align: "left", fontFace: "Arial",
+
+      // Title Slide branding indicator
+      titleSlide.addShape(pptx.ShapeType.rect, {
+        x: 1.0, y: 1.5, w: 0.6, h: 0.1, fill: { color: hex(themeKey === "gradient" ? "#ffffff" : theme.accent) },
       });
 
-      // ---- Content slides ----
+      titleSlide.addText(deck.deckTitle, {
+        x: 1.0, y: 1.8, w: W - 2.0, h: 1.5, fontSize: 36, bold: true,
+        color: hex(themeKey === "gradient" ? "#ffffff" : theme.titleText),
+        align: "left", fontFace: "Arial",
+      });
+
+      if (deck.subtitle) {
+        titleSlide.addText(deck.subtitle, {
+          x: 1.0, y: 3.4, w: W - 2.0, h: 0.8, fontSize: 18,
+          color: hex(themeKey === "gradient" ? "rgba(255,255,255,0.8)" : theme.muted),
+          align: "left", fontFace: "Arial",
+        });
+      }
+
+      titleSlide.addText(`${deck.author} · ${new Date().toLocaleDateString(undefined, { year: "numeric", month: "short" })}`, {
+        x: 1.0, y: H - 1.5, w: 6.0, h: 0.4, fontSize: 12,
+        color: hex(themeKey === "gradient" ? "rgba(255,255,255,0.7)" : theme.muted),
+        fontFace: "Arial",
+      });
+
+      // Content Slides
       const slides = deck.slides || [];
       for (let i = 0; i < slides.length; i++) {
         const s = slides[i];
-        setProgress(`Building slide ${i + 1} of ${slides.length}…`);
+        setProgress(`Writing slide ${i + 1} of ${slides.length}…`);
         const slide = pptx.addSlide();
         slide.background = { color: hex(theme.bg) };
 
@@ -223,11 +233,10 @@ export default function PresentationGenerator({ post, profile, onClose }) {
           });
         }
 
-        // Image (right side) — use the data URL already preloaded for the preview.
+        // Image (right side)
         if (hasImage) {
           const dataUrl = images[i]?.dataUrl;
           if (dataUrl) {
-            // Panel behind image
             slide.addShape(pptx.ShapeType.rect, {
               x: 8.05, y: 1.55, w: 4.5, h: 4.0, fill: { color: hex(theme.panel) }, line: { type: "none" },
             });
@@ -258,87 +267,101 @@ export default function PresentationGenerator({ post, profile, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-[3px] z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-[28px] w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-200">
+        
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <div>
-            <h2 className="font-semibold text-gray-900 flex items-center gap-1.5">
-              <Presentation size={16} /> AI Presentation Generator
-            </h2>
-            <p className="text-xs text-gray-500 mt-0.5">Gamma-style decks → editable PowerPoint (.pptx)</p>
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-gray-50/50 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-linkedin/10 text-linkedin rounded-xl flex items-center justify-center border border-linkedin/10">
+              <Presentation size={16} />
+            </div>
+            <div>
+              <h2 className="font-bold text-gray-900 text-base">AI Presentation Generator</h2>
+              <p className="text-[11px] text-gray-400 mt-0.5">Gamma-style deck outlines exported directly into editable PowerPoint files</p>
+            </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+          <button 
+            onClick={onClose} 
+            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors text-2xl leading-none"
+          >
+            ×
+          </button>
         </div>
 
-        <div className="p-4 space-y-4">
+        {/* Scrollable Body */}
+        <div className="overflow-y-auto flex-1 p-6 md:p-8 space-y-6">
           {/* Step 1: Input */}
           {step === "input" && (
             <>
-              <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">Presentation topic</label>
-                <input
-                  type="text"
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  placeholder="e.g. 'Scaling a Next.js app to 15,000 users'"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-linkedin/30 focus:border-linkedin"
-                />
-              </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-700 block">Presentation Topic</label>
+                  <input
+                    type="text"
+                    value={topic}
+                    onChange={(e) => setTopic(e.target.value)}
+                    placeholder="e.g. 'Scaling a Next.js app to 15,000 users'"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-linkedin/30 transition placeholder-gray-400"
+                  />
+                </div>
 
-              {/* Slide count */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1.5">Number of slides</label>
-                <div className="flex gap-2">
-                  {SLIDE_COUNTS.map((n) => (
-                    <button
-                      key={n}
-                      onClick={() => setNumSlides(n)}
-                      className={`px-4 py-1.5 rounded-full text-sm border transition ${
-                        numSlides === n
-                          ? "bg-linkedin text-white border-linkedin"
-                          : "border-gray-200 text-gray-600 hover:bg-gray-50"
-                      }`}
-                    >
-                      {n}
-                    </button>
-                  ))}
+                {/* Slide count */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-700 block">Number of Slides</label>
+                  <div className="flex gap-2">
+                    {SLIDE_COUNTS.map((n) => (
+                      <button
+                        key={n}
+                        onClick={() => setNumSlides(n)}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all active:scale-[0.97] ${
+                          numSlides === n
+                            ? "bg-linkedin/10 text-linkedin border-linkedin/15"
+                            : "border-gray-200 text-gray-600 hover:bg-gray-50 bg-white"
+                        }`}
+                      >
+                        {n} Slides
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Theme picker */}
+                <div className="space-y-2.5">
+                  <label className="text-xs font-bold text-gray-700 block">Design Theme</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {THEME_LIST.map((t) => (
+                      <button
+                        key={t.key}
+                        onClick={() => setThemeKey(t.key)}
+                        className={`rounded-xl overflow-hidden border-2 transition-all active:scale-[0.98] ${
+                          themeKey === t.key ? "border-linkedin shadow-sm" : "border-gray-150 hover:border-gray-300"
+                        }`}
+                      >
+                        <div className="h-10" style={{ background: t.gradient }} />
+                        <div className="text-[10px] font-bold text-gray-700 py-1.5 text-center bg-gray-50/50 border-t border-gray-100">{t.label}</div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Theme picker */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1.5">Theme</label>
-                <div className="grid grid-cols-4 gap-2">
-                  {THEME_LIST.map((t) => (
-                    <button
-                      key={t.key}
-                      onClick={() => setThemeKey(t.key)}
-                      className={`rounded-lg overflow-hidden border-2 transition ${
-                        themeKey === t.key ? "border-linkedin" : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <div className="h-12" style={{ background: t.gradient }} />
-                      <div className="text-[11px] text-gray-600 py-1 text-center">{t.label}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p className="text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-xl px-4 py-2.5">{error}</p>}
 
               <button
                 onClick={generate}
                 disabled={loading || !topic.trim()}
-                className="w-full bg-linkedin hover:bg-linkedin-hover text-white font-medium py-2.5 rounded-full text-sm disabled:opacity-50 transition flex items-center justify-center gap-1.5"
+                className="w-full bg-linkedin hover:bg-linkedin-hover text-white font-bold py-3 rounded-full text-xs disabled:opacity-50 transition shadow-sm hover:shadow active:scale-[0.99] flex items-center justify-center gap-1.5"
               >
-                {loading ? "Designing your deck…" : <><Sparkles size={14} /> Generate Presentation</>}
+                {loading ? <><RefreshCw className="animate-spin" size={13} /> Designing deck outline...</> : <><Sparkles size={13} /> Generate Presentation</>}
               </button>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800 space-y-1">
-                <p>• AI writes title + bullets + speaker notes for each slide</p>
-                <p>• AI image generated per slide (~30–45s each — please wait)</p>
-                <p>• Exports as a fully editable .pptx (PowerPoint / Google Slides)</p>
+              <div className="bg-blue-50/30 border border-blue-100 rounded-2xl p-5 text-xs text-blue-800 space-y-2.5">
+                <div className="space-y-1.5 leading-relaxed">
+                  <p>• AI writes tailored titles, bullet points, and presenter script notes for each slide.</p>
+                  <p>• Creates professional visual prompt guides and automatically loads custom slide illustrations (~30-45s).</p>
+                  <p>• Exports to standard 16:9 **PowerPoint / Google Slides (.pptx)** templates with full editing permissions.</p>
+                </div>
               </div>
             </>
           )}
@@ -346,21 +369,26 @@ export default function PresentationGenerator({ post, profile, onClose }) {
           {/* Step 2: Preview */}
           {step === "preview" && deck && (
             <>
-              <p className="text-sm text-gray-600">
-                <strong>{deck.deckTitle}</strong> — {deck.slides?.length || 0} slides. Review, then download.
-              </p>
+              <div className="flex items-center justify-between pb-1">
+                <p className="text-xs font-bold text-gray-700">
+                  Slide Deck Preview ({deck.slides?.length || 0} Slides)
+                </p>
+              </div>
 
-              <div className="space-y-2 max-h-[55vh] overflow-y-auto pr-1">
+              <div className="space-y-4 max-h-[420px] overflow-y-auto pr-1 bg-gray-50/50 border border-gray-100 rounded-2xl p-4.5">
                 {/* Title slide preview */}
                 <div
-                  className="rounded-lg p-4 text-white"
+                  className="rounded-2xl p-5 text-white shadow-sm flex flex-col justify-between"
                   style={{ aspectRatio: "16/9", background: themeKey === "gradient" ? theme.gradient : theme.titleSlideBg }}
                 >
-                  <div className="h-full flex flex-col justify-center">
-                    <div className="w-10 h-1 rounded-full bg-white/70 mb-2" />
-                    <p className="text-lg font-extrabold leading-tight">{deck.deckTitle}</p>
-                    {deck.subtitle && <p className="text-xs text-white/80 mt-1">{deck.subtitle}</p>}
-                    <p className="text-[10px] text-white/60 mt-3">{deck.author}</p>
+                  <div className="flex-1 flex flex-col justify-center">
+                    <div className="w-10 h-1.5 rounded-full bg-white/70 mb-3" />
+                    <p className="text-base font-black leading-tight tracking-tight">{deck.deckTitle}</p>
+                    {deck.subtitle && <p className="text-[11px] text-white/80 mt-1.5 leading-relaxed font-semibold">{deck.subtitle}</p>}
+                  </div>
+                  <div className="flex items-center justify-between pt-4 border-t border-white/10 text-[9px] text-white/60 font-semibold uppercase tracking-wider">
+                    <span>{deck.author}</span>
+                    <span>TITLE SLIDE</span>
                   </div>
                 </div>
 
@@ -368,19 +396,22 @@ export default function PresentationGenerator({ post, profile, onClose }) {
                 {(deck.slides || []).map((s, i) => (
                   <div
                     key={i}
-                    className="rounded-lg border border-gray-200 overflow-hidden flex"
+                    className="rounded-2xl border border-gray-200 overflow-hidden flex shadow-sm"
                     style={{ aspectRatio: "16/9", background: theme.bg }}
                   >
-                    <div className="flex-1 p-3 min-w-0">
-                      <p className="text-sm font-bold mb-1.5" style={{ color: theme.title }}>{s.title}</p>
-                      <ul className="space-y-1">
-                        {(s.bullets || []).slice(0, 5).map((b, j) => (
-                          <li key={j} className="text-[11px] flex gap-1.5" style={{ color: theme.body }}>
-                            <span style={{ color: theme.accent }}>•</span>
-                            <span className="min-w-0">{b}</span>
-                          </li>
-                        ))}
-                      </ul>
+                    <div className="flex-1 p-5 min-w-0 flex flex-col justify-between">
+                      <div>
+                        <p className="text-xs font-black mb-3 border-b pb-2" style={{ color: theme.title, borderColor: "rgba(0,0,0,0.03)" }}>{s.title}</p>
+                        <ul className="space-y-1.5">
+                          {(s.bullets || []).slice(0, 4).map((b, j) => (
+                            <li key={j} className="text-[10px] leading-relaxed flex gap-1.5 font-semibold" style={{ color: theme.body }}>
+                              <span style={{ color: theme.accent }}>•</span>
+                              <span className="min-w-0">{b}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <span className="text-[8px] font-bold uppercase tracking-wider text-gray-400 mt-2">Slide {i + 1} of {deck.slides?.length}</span>
                     </div>
                     {s.imagePrompt && (
                       <SlidePreviewImage state={images[i]} theme={theme} onRetry={() => retryImage(i)} />
@@ -389,52 +420,55 @@ export default function PresentationGenerator({ post, profile, onClose }) {
                 ))}
               </div>
 
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p className="text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-xl px-4 py-2.5">{error}</p>}
 
               {/* Image load progress */}
               {totalImages > 0 && imagesLoading && (
-                <div>
-                  <p className="text-xs text-gray-600 flex items-center gap-1.5 mb-1">
+                <div className="bg-white border border-gray-200 p-5 rounded-2xl space-y-2.5 shadow-sm">
+                  <p className="text-xs font-bold text-gray-600 flex items-center gap-1.5">
                     <RefreshCw size={12} className="animate-spin text-linkedin" />
-                    Loading images… {resolvedImages}/{totalImages} ready
+                    Generating slide illustrations… {resolvedImages}/{totalImages} ready
                   </p>
                   <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-linkedin transition-all"
+                      className="h-full bg-linkedin transition-all duration-300"
                       style={{ width: `${totalImages ? (resolvedImages / totalImages) * 100 : 0}%` }}
                     />
                   </div>
                 </div>
               )}
+
               {!imagesLoading && failedImages > 0 && (
-                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 flex items-center gap-1.5">
-                  <AlertTriangle size={12} /> {failedImages} image{failedImages > 1 ? "s" : ""} couldn't be generated. Retry them above, or download without them.
+                <p className="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 flex items-start gap-2 leading-relaxed">
+                  <AlertTriangle size={13} className="shrink-0 mt-0.5" /> 
+                  <span>{failedImages} image{failedImages > 1 ? "s" : ""} couldn't render. You can retry them above or proceed to download the presentation without them.</span>
                 </p>
               )}
+
               {downloading && progress && (
-                <p className="text-xs text-linkedin flex items-center gap-1.5"><ImageIcon size={12} /> {progress}</p>
+                <p className="text-xs text-linkedin flex items-center gap-1.5 font-bold"><RefreshCw size={12} className="animate-spin" /> {progress}</p>
               )}
 
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <button
                   onClick={() => setStep("input")}
-                  className="flex-1 border border-gray-200 text-gray-700 text-sm py-2.5 rounded-full hover:bg-gray-50"
+                  className="flex-1 border border-gray-200 text-gray-600 font-bold text-xs py-3 rounded-full hover:bg-gray-50 transition active:scale-[0.99] flex items-center justify-center gap-1"
                 >
-                  ← Back
+                  <ArrowLeft size={13} /> Edit Topic
                 </button>
                 <button
                   onClick={downloadPPTX}
                   disabled={downloading || imagesLoading}
                   title={imagesLoading ? "Wait for all images to finish loading" : ""}
-                  className="flex-[2] bg-linkedin hover:bg-linkedin-hover text-white text-sm font-medium py-2.5 px-6 rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="flex-[2] bg-linkedin hover:bg-linkedin-hover text-white font-bold py-3 px-6 rounded-full text-xs disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm hover:shadow active:scale-[0.99] flex items-center justify-center gap-1.5"
                 >
                   {downloading
-                    ? "Building .pptx…"
+                    ? "Assembling PowerPoint file..."
                     : imagesLoading
-                    ? `Loading images… ${resolvedImages}/${totalImages}`
+                    ? `Loading slide assets… (${resolvedImages}/${totalImages})`
                     : failedImages > 0
-                    ? <><Download size={13} className="inline mr-1" />Download anyway</>
-                    : <><Download size={13} className="inline mr-1" />Download PowerPoint</>}
+                    ? <><Download size={13} /> Download Deck Anyway</>
+                    : <><Download size={13} /> Download PowerPoint (.pptx)</>}
                 </button>
               </div>
             </>
@@ -442,14 +476,21 @@ export default function PresentationGenerator({ post, profile, onClose }) {
 
           {/* Step 3: Done */}
           {step === "done" && (
-            <div className="text-center py-6">
-              <CheckCircle size={48} className="mx-auto text-green-500 mb-3" />
-              <h3 className="font-semibold text-gray-900 text-lg mb-1">Presentation downloaded!</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Open the .pptx in PowerPoint, Keynote, or Google Slides — everything is fully editable.
-              </p>
-              <button onClick={onClose} className="bg-linkedin text-white px-6 py-2.5 rounded-full text-sm font-medium">
-                Done
+            <div className="text-center py-6 space-y-4">
+              <div className="w-14 h-14 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                <CheckCircle size={28} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-bold text-gray-900 text-base">PowerPoint Downloaded!</h3>
+                <p className="text-xs text-gray-500 leading-normal max-w-md mx-auto">
+                  Open the exported presentation file in PowerPoint, Google Slides, or Keynote. Every card, block, text, and illustration remains fully editable.
+                </p>
+              </div>
+              <button 
+                onClick={onClose} 
+                className="bg-linkedin hover:bg-linkedin-hover text-white font-bold px-8 py-3 rounded-full text-xs transition shadow-sm hover:shadow active:scale-[0.99] inline-block"
+              >
+                Close Deck Builder
               </button>
             </div>
           )}

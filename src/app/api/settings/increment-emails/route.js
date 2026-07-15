@@ -8,7 +8,7 @@ export async function POST() {
     const settings = await Settings.findOneAndUpdate(
       { userId: "default" },
       { $inc: { emailsSentCount: 1 } },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
     return NextResponse.json({ success: true, emailsSentCount: settings.emailsSentCount });
   } catch (error) {

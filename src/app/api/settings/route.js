@@ -22,6 +22,7 @@ export async function GET() {
         reminderEnabled: true,
         pushEnabled: false,
         topics: {},
+        visibleTools: {},
       };
     }
     return NextResponse.json({ success: true, settings });
@@ -54,7 +55,7 @@ export async function POST(request) {
     const settings = await Settings.findOneAndUpdate(
       { userId: user._id },
       { $set: { ...body, userId: user._id } },
-      { upsert: true, new: true, runValidators: true }
+      { upsert: true, returnDocument: 'after', runValidators: true }
     );
 
     return NextResponse.json({ success: true, settings });

@@ -62,6 +62,7 @@ export default function NotificationBell() {
   const [notifs, setNotifs] = useState([]);
   const [badge, setBadge]   = useState(getBadgeCount);
   const [loading, setLoading] = useState(false);
+  const [selectedNotif, setSelectedNotif] = useState(null);
 
   // ── Fetch notifications from server ─────────────────────────────────────────
   const fetchNotifs = useCallback(async () => {
@@ -244,7 +245,11 @@ export default function NotificationBell() {
                 return (
                   <div
                     key={n.id || n._id}
-                    onClick={() => markRead(n.id || n._id)}
+                    onClick={() => {
+                      markRead(n.id || n._id);
+                      setSelectedNotif(n);
+                      setOpen(false);
+                    }}
                     className={`relative flex gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50 transition ${!n.read ? "bg-blue-50/30" : ""}`}
                   >
                     {!n.read && (
@@ -286,6 +291,54 @@ export default function NotificationBell() {
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Full Notification Detail Modal */}
+      {selectedNotif && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-[2px] z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedNotif(null)}
+        >
+          <div
+            className="bg-white rounded-2xl w-full max-w-sm shadow-2xl border border-gray-150 p-6 space-y-4 animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+              <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">
+                Notification Detail
+              </span>
+              <button
+                onClick={() => setSelectedNotif(null)}
+                className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-650 hover:bg-gray-50 rounded-lg transition"
+              >
+                <X size={15} />
+              </button>
+            </div>
+            
+            <div className="flex items-start gap-3">
+              <div className={`shrink-0 w-9 h-9 rounded-full ${TYPE_STYLE[selectedNotif.type]?.bg || "bg-slate-50"} ${TYPE_STYLE[selectedNotif.type]?.icon || "text-slate-500"} flex items-center justify-center`}>
+                {selectedNotif.icon ? <span className="text-base">{selectedNotif.icon}</span> : TYPE_ICON[selectedNotif.type]}
+              </div>
+              <div className="flex-1 space-y-1">
+                <h4 className="text-xs font-extrabold text-gray-900 leading-snug">{selectedNotif.title}</h4>
+                <p className="text-[10px] text-gray-400">{timeAgo(selectedNotif.createdAt)}</p>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 border border-gray-100/50 rounded-xl p-4 text-xs font-semibold text-gray-605 leading-relaxed whitespace-pre-wrap">
+              {selectedNotif.message || "No additional details available."}
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setSelectedNotif(null)}
+                className="text-xs text-white bg-linkedin hover:bg-linkedin-hover px-5 py-2.5 rounded-full font-bold shadow-sm"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

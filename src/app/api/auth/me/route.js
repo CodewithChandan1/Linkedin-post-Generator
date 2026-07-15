@@ -45,7 +45,7 @@ export async function POST(request) {
           "profile.projects": projects !== undefined ? projects : user.profile.projects,
         },
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     return NextResponse.json({

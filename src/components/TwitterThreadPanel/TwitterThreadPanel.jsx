@@ -2,7 +2,7 @@
 // Twitter/X Thread Formatter — PRD §6.9
 
 import { useState } from "react";
-import { Copy, Check, ClipboardList, ExternalLink } from "lucide-react";
+import { Copy, Check, ClipboardList, ExternalLink, RefreshCw, Info, HelpCircle } from "lucide-react";
 
 export default function TwitterThreadPanel({ post, onClose }) {
   const [thread, setThread] = useState(null);
@@ -49,7 +49,6 @@ export default function TwitterThreadPanel({ post, onClose }) {
       setTimeout(() => setCopiedImage(null), 2500);
     } catch (err) {
       console.error(err);
-      // Fallback: open in a new tab so user can right click -> copy/save
       window.open(imageUrl, "_blank");
     } finally {
       setCopyingImage(null);
@@ -100,125 +99,138 @@ export default function TwitterThreadPanel({ post, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <div>
-            {/* 𝕏 is the X brand letter — not an emoji, intentional */}
-            <h2 className="font-semibold text-gray-900">𝕏 Twitter / X Thread</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Reformat post as a thread — one click to compose</p>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-[3px] z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-[28px] w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-200">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-gray-50/50 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gray-900 text-white rounded-xl flex items-center justify-center font-black text-sm">
+              𝕏
+            </div>
+            <div>
+              <h2 className="font-bold text-gray-900 text-base">Twitter / 𝕏 Thread Formatter</h2>
+              <p className="text-[11px] text-gray-400 mt-0.5">Adapt LinkedIn posts into highly readable tweet threads</p>
+            </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+          <button 
+            onClick={onClose} 
+            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors text-2xl leading-none"
+          >
+            ×
+          </button>
         </div>
 
-        <div className="p-4 space-y-4">
+        {/* Scrollable Body */}
+        <div className="overflow-y-auto flex-1 p-6 md:p-8 space-y-6">
           {!thread ? (
             <>
               {post && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                  <p className="text-xs text-gray-500 mb-1">Converting:</p>
-                  <p className="text-xs text-gray-700 line-clamp-2">{post.content?.slice(0, 120)}…</p>
+                <div className="bg-white border border-gray-200/80 rounded-2xl p-4.5 shadow-sm space-y-2">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Converting LinkedIn Post</p>
+                  <p className="text-xs text-gray-600 leading-relaxed line-clamp-3 font-medium italic">"{post.content}"</p>
                 </div>
               )}
 
-              <div className="bg-gray-900 rounded-lg p-3 text-xs text-gray-300 space-y-1">
-                <p className="text-white font-medium">No X API needed</p>
-                <p>Generates thread text — you post manually or via compose URL</p>
-                <p>X API is $100/month — we keep it free</p>
+              <div className="bg-gray-50 border border-gray-200/60 rounded-2xl p-5 text-xs text-gray-600 space-y-2.5">
+                <p className="font-extrabold uppercase tracking-wider text-[10px] text-gray-700 flex items-center gap-1"><Info size={12} /> Local conversion:</p>
+                <div className="space-y-1.5 leading-relaxed font-semibold">
+                  <p>• Formats raw text into sequential tweets of 280 characters or less.</p>
+                  <p>• No expensive X API access required — we structure it for clean copy-pasting.</p>
+                  <p>• Suggests visual image placements and thread transition anchors.</p>
+                </div>
               </div>
 
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p className="text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-xl px-4 py-2.5">{error}</p>}
 
               <button
                 onClick={generate}
                 disabled={loading || !post}
-                className="w-full bg-gray-900 hover:bg-black text-white font-medium py-2.5 rounded-full text-sm disabled:opacity-50"
+                className="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-full text-xs disabled:opacity-50 transition shadow-sm hover:shadow active:scale-[0.99]"
               >
-                {loading ? "Formatting thread…" : "Format as Twitter Thread"}
+                {loading ? <><RefreshCw className="animate-spin" size={13} /> Formatting tweets outline...</> : "Format as Twitter Thread"}
               </button>
             </>
           ) : (
             <>
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-gray-900">
-                  {thread.tweets.length} tweets ready
+              <div className="flex items-center justify-between pb-1">
+                <p className="text-xs font-bold text-gray-700">
+                  {thread.tweets.length} Tweets Ready
                 </p>
                 <button
                   onClick={() => copy(buildFullThread(), "full")}
-                  className="text-xs text-gray-700 border border-gray-300 px-3 py-1 rounded-full hover:bg-gray-50 flex items-center gap-1"
+                  className={`text-[10px] font-bold px-3.5 py-1.5 rounded-full border transition-all flex items-center gap-1 ${
+                    copied === "full"
+                      ? "bg-gray-900 text-white border-gray-900"
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                  }`}
                 >
-                  {copied === "full" ? <><Check size={11} /> Copied</> : <><Copy size={11} /> Copy all</>}
+                  {copied === "full" ? <Check size={11} /> : null}
+                  {copied === "full" ? "Copied Thread" : "Copy Full Thread"}
                 </button>
               </div>
 
-              <div className="space-y-2">
+              {/* Tweets list */}
+              <div className="space-y-3.5">
                 {thread.tweets.map((tweet, i) => (
-                  <div key={i} className="border border-gray-200 rounded-xl p-3">
-                    <div className="flex items-start gap-3">
-                      <div className="w-7 h-7 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                  <div key={i} className="border border-gray-200/80 bg-white rounded-2xl p-5 shadow-sm space-y-4">
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-black shrink-0 shadow-sm">
                         {tweet.number || i + 1}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-800 leading-relaxed">{tweet.text}</p>
+                      <div className="flex-1 min-w-0 space-y-3">
+                        <p className="text-xs text-gray-700 leading-relaxed font-semibold whitespace-pre-wrap">{tweet.text}</p>
                         
                         {tweet.imageUrl && (
-                          <div className="mt-3 rounded-lg overflow-hidden border border-gray-200 relative group">
+                          <div className="rounded-xl overflow-hidden border border-gray-100 relative group max-w-md">
                             <img
                               src={tweet.imageUrl}
                               alt={`Tweet ${i + 1} visual`}
-                              className="w-full h-auto max-h-40 object-cover"
+                              className="w-full h-auto max-h-48 object-cover"
                             />
-                            <div className="absolute top-2 right-2 flex gap-1.5 opacity-90 hover:opacity-100 transition">
+                            <div className="absolute top-2.5 right-2.5 flex gap-1.5 opacity-90 group-hover:opacity-100 transition">
                               <button
                                 onClick={() => handleCopyImage(tweet.imageUrl, i)}
-                                className="bg-black/75 hover:bg-black text-white text-[10px] px-2.5 py-1 rounded-md flex items-center gap-1 transition font-medium"
+                                className="bg-black/75 hover:bg-black text-white text-[9px] px-2.5 py-1.5 rounded-md flex items-center gap-1 transition font-bold"
                               >
-                                {copyingImage === i ? "Copying..." : copiedImage === i ? "✓ Copied" : "Copy Image to Paste"}
+                                {copyingImage === i ? "Copying..." : copiedImage === i ? "✓ Copied" : "Copy Image"}
                               </button>
                               <button
                                 onClick={async () => {
                                   const { downloadCleanImage } = await import("@/lib/imageUtils");
                                   downloadCleanImage(tweet.imageUrl, `clean-tweet-${i + 1}.png`);
                                 }}
-                                className="bg-black/75 hover:bg-black text-white text-[10px] px-2.5 py-1 rounded-md flex items-center gap-1 transition font-medium"
+                                className="bg-black/75 hover:bg-black text-white text-[9px] px-2.5 py-1.5 rounded-md flex items-center gap-1 transition font-bold"
                               >
-                                Download Clean
+                                Download
                               </button>
-                              <a
-                                href={tweet.imageUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="bg-black/75 hover:bg-black text-white text-[10px] px-2.5 py-1 rounded-md flex items-center gap-1 transition font-medium"
-                              >
-                                <ExternalLink size={10} /> Open
-                              </a>
                             </div>
                           </div>
                         )}
 
                         {tweet.imagePrompt && !tweet.imageUrl && (
-                          <p className="text-[11px] text-gray-500 italic mt-2 border-l-2 border-gray-200 pl-2">
+                          <p className="text-[10px] text-gray-400 italic bg-gray-50 border border-gray-100 rounded-xl p-3 leading-relaxed font-semibold">
                             💡 Suggested visual prompt: {tweet.imagePrompt}
                           </p>
                         )}
 
-                        <div className="flex items-center justify-between mt-2">
-                          <span className={`text-[10px] ${(tweet.text?.length || 0) > 270 ? "text-red-500" : "text-gray-400"}`}>
-                            {tweet.text?.length || 0}/280
+                        <div className="flex items-center justify-between border-t border-gray-50 pt-3">
+                          <span className={`text-[10px] font-bold ${(tweet.text?.length || 0) > 270 ? "text-rose-500" : "text-gray-400"}`}>
+                            {tweet.text?.length || 0} / 280
                           </span>
-                          <div className="flex gap-1.5">
+                          <div className="flex gap-2">
                             <button
                               onClick={() => copy(tweet.text, `tweet-${i}`)}
-                              className="text-[10px] text-gray-600 border border-gray-200 px-2 py-0.5 rounded-full hover:bg-gray-50 flex items-center gap-0.5"
+                              className="text-[10px] font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 px-3 py-1.5 rounded-full transition"
                             >
-                              {copied === `tweet-${i}` ? <><Check size={10} /> Done</> : <><Copy size={10} /> Copy</>}
+                              {copied === `tweet-${i}` ? "✓ Done" : "Copy Tweet"}
                             </button>
                             {i === 0 && (
                               <button
                                 onClick={() => openXCompose(tweet.text)}
-                                className="text-[10px] text-white bg-gray-900 px-2 py-0.5 rounded-full hover:bg-black flex items-center gap-0.5"
+                                className="text-[10px] font-bold text-white bg-gray-900 hover:bg-black px-3.5 py-1.5 rounded-full transition flex items-center gap-1 shadow-sm"
                               >
-                                <ExternalLink size={10} /> Open on 𝕏
+                                <ExternalLink size={11} /> Open on 𝕏
                               </button>
                             )}
                           </div>
@@ -229,21 +241,24 @@ export default function TwitterThreadPanel({ post, onClose }) {
                 ))}
               </div>
 
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-600">
-                <p className="font-medium mb-1 flex items-center gap-1">
-                  <ClipboardList size={12} /> How to post a thread on X:
+              {/* Instructions */}
+              <div className="bg-gray-50 border border-gray-255 rounded-2xl p-5 space-y-2.5">
+                <p className="font-bold text-gray-700 text-xs flex items-center gap-1.5">
+                  <ClipboardList size={13} /> How to Post Thread on X:
                 </p>
-                <p>1. Click &ldquo;Open on 𝕏&rdquo; on tweet #1 to open the compose window</p>
-                <p>2. If a tweet shows an image, click &ldquo;Open Image to Save&rdquo;, save it, and upload it to that tweet box on X</p>
-                <p>3. Click &ldquo;+&rdquo; to add the next tweet in the thread</p>
-                <p>4. Paste each tweet sequentially and hit &ldquo;Post all&rdquo;</p>
+                <div className="space-y-1.5 text-xs text-gray-600 leading-relaxed font-semibold">
+                  <p>1. Click <strong>Open on 𝕏</strong> to launch compose box for Tweet #1.</p>
+                  <p>2. Copy & paste each subsequent tweet sequentially using the copy buttons above.</p>
+                  <p>3. Copy/download any generated slide images and add them to X's media frames.</p>
+                  <p>4. Hit <strong>Post all</strong> to publish your thread.</p>
+                </div>
               </div>
 
               <button
                 onClick={() => setThread(null)}
-                className="w-full border border-gray-200 text-gray-600 text-sm py-2 rounded-full hover:bg-gray-50"
+                className="w-full border border-gray-200 text-gray-600 font-semibold text-xs py-3 rounded-full hover:bg-gray-50 hover:text-gray-800 transition active:scale-[0.99] mt-2"
               >
-                Regenerate
+                Regenerate Thread
               </button>
             </>
           )}
